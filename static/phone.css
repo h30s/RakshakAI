@@ -1,0 +1,64 @@
+/* Phone camera page (served to phones on their own, so it carries its own tokens). */
+:root {
+  --bg: #07090e; --surface: #0f141c; --surface-2: #151b25; --border: rgba(148, 163, 184, .14); --border-2: rgba(148, 163, 184, .24);
+  --text: #e9eef6; --text-2: #b4bdcb; --muted: #7f8a9c;
+  --primary: #4d8dff; --ok: #2ecc8f; --danger: #ff5c63;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  color-scheme: dark; -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; color: var(--text);
+  background: radial-gradient(700px 380px at 20% -10%, rgba(77, 141, 255, .14), transparent 60%), var(--bg);
+}
+[hidden] { display: none !important; }
+
+.bar {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 11px; padding: 12px 18px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  background: rgba(8, 11, 17, .8); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
+}
+.logo {
+  width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; color: #fff;
+  background: linear-gradient(135deg, #4d8dff, #2ecc8f); box-shadow: 0 6px 20px rgba(77, 141, 255, .35);
+}
+.logo svg { width: 21px; height: 21px; }
+.title { display: flex; flex-direction: column; font-weight: 700; font-size: 15px; line-height: 1.15; }
+.title small { font-size: 11px; font-weight: 500; color: var(--muted); }
+
+main { max-width: 640px; margin: 0 auto; padding: 24px 18px calc(36px + env(safe-area-inset-bottom)); }
+.eyebrow { font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: #6ea3ff; margin-bottom: 6px; }
+h1 { margin: 0 0 8px; font-size: 24px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+.lead { margin: 0 0 20px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+
+.preview {
+  position: relative; aspect-ratio: 16 / 9; background: #04060a; border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--border); box-shadow: 0 16px 40px rgba(0, 0, 0, .4);
+}
+.preview video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.placeholder {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  color: var(--muted); font-size: 14px; background: radial-gradient(circle at 50% 40%, #121925, #080b10);
+}
+.placeholder svg { width: 40px; height: 40px; padding: 10px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+.badge {
+  position: absolute; top: 12px; left: 12px; padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 700;
+  color: #fff; background: rgba(5, 8, 12, .65); backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, .1);
+}
+.badge.on { color: var(--ok); }
+
+.status {
+  margin: 16px 0; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; min-height: 21px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--text-2);
+}
+.status.ok { color: var(--ok); border-color: rgba(46, 204, 143, .35); background: rgba(46, 204, 143, .08); }
+.status.bad { color: #ff8a8f; border-color: rgba(255, 92, 99, .4); background: rgba(255, 92, 99, .08); }
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn {
+  appearance: none; font: inherit; font-size: 15px; font-weight: 650; height: 50px; padding: 0 18px; border-radius: 12px; cursor: pointer; flex: 1 1 auto;
+  border: 1px solid var(--border-2); background: var(--surface-2); color: var(--text); transition: filter .15s, transform .08s;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: linear-gradient(180deg, #5b97ff, #3f7df0); border-color: transparent; color: #fff; box-shadow: 0 8px 22px rgba(77, 141, 255, .35); }
+.tips { margin: 22px 0 0; padding: 14px 16px 14px 34px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 13px; line-height: 1.6; }

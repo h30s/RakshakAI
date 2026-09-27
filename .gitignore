@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+videos/
+models/
+*.pt
+certs/
+data/

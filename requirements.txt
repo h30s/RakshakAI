@@ -1,0 +1,12 @@
+# Install CPU PyTorch first for a much smaller download:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+ultralytics>=8.3
+opencv-python-headless>=4.9
+fastapi>=0.110
+uvicorn[standard]>=0.29
+huggingface_hub>=0.23
+onnxruntime>=1.18
+onnx>=1.16         # only needed once, to export the ReID model in scripts/fetch_assets.py
+onnxslim>=0.1       # used by the ONNX export of the YOLO models
+segno>=1.6          # QR code for connecting a phone (Camera Sources)
+cryptography>=42    # self-signed HTTPS certificate for the phone camera page

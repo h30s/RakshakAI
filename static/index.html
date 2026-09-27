@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07090e">
+  <title>Operations · Rakshak AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=9">
+  <link rel="stylesheet" href="/static/threats.css?v=4">
+</head>
+<body>
+  <header id="app-nav" data-page="dashboard"></header>
+
+  <div id="toasts" class="toasts" aria-live="assertive"></div>
+
+  <main>
+    <section id="overview-view" class="overview" hidden>
+      <div class="page-head">
+        <div>
+          <div class="eyebrow"><i data-icon="shield"></i>Security operations</div>
+          <h1>Overview</h1>
+          <p>Live threat status across every camera: what is happening, where, how serious it is and who is on it.</p>
+        </div>
+        <div class="page-meta"><span class="chip live">Live</span><span id="ov-updated"></span></div>
+      </div>
+
+      <div id="ov-banner" class="ov-banner" hidden></div>
+
+      <div class="ov-cards">
+        <div class="ov-card" id="card-score">
+          <div class="kpi-top"><span class="kpi-icon"><i data-icon="shield"></i></span><span class="ov-label">Overall threat score</span></div>
+          <div class="ov-big"><span id="ov-score">–</span><small>/100</small><span id="ov-level" class="lv-pill lv-none">–</span></div>
+          <div class="bar"><span id="ov-score-bar"></span></div>
+        </div>
+        <a class="ov-card" id="card-active" href="#ov-alerts">
+          <div class="kpi-top"><span class="kpi-icon"><i data-icon="alert"></i></span><span class="ov-label">Active threats</span></div>
+          <div class="ov-big"><span id="ov-active">–</span></div>
+          <span id="ov-active-sub" class="ov-sub"></span>
+        </a>
+        <div class="ov-card" id="card-online">
+          <div class="kpi-top"><span class="kpi-icon"><i data-icon="cameras"></i></span><span class="ov-label">Cameras online</span></div>
+          <div class="ov-big"><span id="ov-online">–</span><small id="ov-total"></small></div>
+          <span id="ov-online-sub" class="ov-sub"></span>
+        </div>
+        <div class="ov-card" id="card-issues">
+          <div class="kpi-top"><span class="kpi-icon"><i data-icon="cameraOff"></i></span><span class="ov-label">Camera issues</span></div>
+          <div class="ov-big"><span id="ov-issues">–</span></div>
+          <span id="ov-issues-sub" class="ov-sub"></span>
+        </div>
+      </div>
+
+      <div class="ov-main">
+        <section class="card ov-cameras">
+          <div class="card-head"><h2><i data-icon="cameras"></i>Camera status</h2><span class="muted">Highest risk first · click to watch</span></div>
+          <div id="ov-camera-list" class="cam-list"></div>
+        </section>
+        <section class="card ov-alerts" id="ov-alerts">
+          <div class="card-head"><h2><i data-icon="bell"></i>Recent alerts</h2><a href="/reports">View all reports →</a></div>
+          <ol id="ov-alert-list" class="alert-list"></ol>
+          <p id="ov-alerts-empty" class="empty" hidden>No threats detected yet.</p>
+        </section>
+      </div>
+
+      <div class="ov-lower">
+        <section class="card">
+          <div class="card-head"><h2><i data-icon="chart"></i>Threat level by camera</h2></div>
+          <div id="ov-bars" class="score-bars"></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2><i data-icon="pin"></i>High-risk areas</h2><span id="ov-areas-count" class="muted"></span></div>
+          <ul id="ov-areas" class="area-list"></ul>
+        </section>
+        <section class="card">
+          <div class="card-head"><h2><i data-icon="activity"></i>Recent activity</h2></div>
+          <ol id="ov-activity" class="activity"></ol>
+        </section>
+      </div>
+    </section>
+
+    <section id="grid-view" aria-label="Camera feeds">
+      <div class="page-head">
+        <div>
+          <div class="eyebrow"><i data-icon="cameras"></i>Live monitoring</div>
+          <h1>Cameras</h1>
+          <p>Every feed with real-time object and weapon detection. Select a camera for the full view.</p>
+        </div>
+        <div class="page-meta"><span class="chip live">Live</span></div>
+      </div>
+    </section>
+
+    <section id="detail-view" class="detail" hidden>
+      <div class="detail-main">
+        <div class="detail-head">
+          <button id="back" class="back" type="button"><i data-icon="back"></i>All cameras</button>
+          <h1 id="detail-title"></h1>
+          <span class="chip live">Live</span>
+          <span class="hint"><i data-icon="route"></i>Click a person to follow their journey</span>
+        </div>
+        <div class="feed feed-large">
+          <canvas id="detail-canvas"></canvas>
+          <span class="feed-time" id="detail-time"></span>
+        </div>
+      </div>
+      <aside class="panel" aria-label="Detected objects">
+        <h2><i data-icon="eye"></i>Detected objects <span id="obj-count" class="count"></span></h2>
+        <ul id="objects" class="objects"></ul>
+        <p id="objects-empty" class="empty">No objects detected.</p>
+      </aside>
+    </section>
+
+    <section id="people-view" hidden>
+      <div class="page-head">
+        <div>
+          <div class="eyebrow"><i data-icon="route"></i>Journey tracking</div>
+          <h1>People</h1>
+          <p>Every person gets an ID that follows them from camera to camera. Search an ID or a location.</p>
+        </div>
+      </div>
+      <div class="people">
+      <aside class="panel people-list" aria-label="People">
+        <h2><i data-icon="people"></i>People <span id="plist-count" class="count"></span></h2>
+        <input id="person-search" class="search" type="search" placeholder="Search ID or location (e.g. P-004, Lobby)" autocomplete="off">
+        <div class="seg" role="group" aria-label="Filter">
+          <button type="button" class="seg-btn active" data-status="active">Active</button>
+          <button type="button" class="seg-btn" data-status="moved" title="People seen in two or more locations">Journeys</button>
+          <button type="button" class="seg-btn" data-status="all">All</button>
+        </div>
+        <ul id="person-list" class="plist"></ul>
+        <p id="person-list-empty" class="empty" hidden>No people match.</p>
+      </aside>
+
+      <div id="person-empty" class="person-empty">
+        <p>Select a person to see where they are and where they have been.</p>
+      </div>
+
+      <div id="person-detail" class="person" hidden>
+        <div class="person-head">
+          <img id="p-photo" class="p-photo" alt="">
+          <div class="p-title">
+            <div class="p-id-row"><h1 id="p-id"></h1><span id="p-status" class="pill"></span></div>
+            <div id="p-meta" class="p-meta"></div>
+            <div id="p-route" class="route" aria-label="Route"></div>
+          </div>
+        </div>
+
+        <div class="person-body">
+          <section class="card">
+            <div class="card-head">
+              <h2><i data-icon="pin"></i>Current location</h2>
+              <span id="p-loc-since" class="muted"></span>
+            </div>
+            <div class="p-loc"><span id="p-loc" class="p-loc-name"></span><span id="p-cam" class="muted"></span></div>
+            <div class="feed feed-person">
+              <canvas id="person-canvas"></canvas>
+              <span class="feed-time" id="person-time"></span>
+              <span id="person-feed-note" class="feed-note" hidden>Not in view — showing last known camera</span>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head">
+              <h2><i data-icon="route"></i>Journey</h2>
+              <span id="p-steps" class="muted"></span>
+            </div>
+            <ol id="journey" class="journey"></ol>
+          </section>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section id="sources-view" hidden>
+      <div class="page-head">
+        <div>
+          <div class="eyebrow"><i data-icon="sources"></i>Live inputs</div>
+          <h1>Camera Sources</h1>
+          <p>Connect a webcam or a phone. Every source goes through the same detection and weapon alerts as the CCTV feeds, and appears under <b>Live Sources</b> on the Cameras tab.</p>
+        </div>
+      </div>
+      <div class="sources">
+      <div class="src-list">
+
+        <article class="src-card" data-source="live-webcam" data-kind="builtin">
+          <button type="button" class="src-head">
+            <span class="src-icon" aria-hidden="true"><i data-icon="laptop"></i></span>
+            <span class="src-title"><span class="src-name">Laptop Webcam</span><span class="src-state">Not connected</span></span>
+          </button>
+          <div class="src-body">
+            <label class="src-field">Camera <select class="src-device"></select></label>
+            <div class="src-actions">
+              <button type="button" class="btn primary src-start">Connect</button>
+              <button type="button" class="btn src-stop" hidden>Disconnect</button>
+            </div>
+            <p class="src-msg" hidden></p>
+          </div>
+        </article>
+
+        <article class="src-card" data-source="live-usb" data-kind="external">
+          <button type="button" class="src-head">
+            <span class="src-icon" aria-hidden="true"><i data-icon="sources"></i></span>
+            <span class="src-title"><span class="src-name">USB / External Camera</span><span class="src-state">Not connected</span></span>
+          </button>
+          <div class="src-body">
+            <label class="src-field">Camera <select class="src-device"></select></label>
+            <div class="src-actions">
+              <button type="button" class="btn primary src-start">Connect</button>
+              <button type="button" class="btn src-stop" hidden>Disconnect</button>
+            </div>
+            <p class="src-msg" hidden></p>
+            <p class="src-hint">USB webcams show up in this list once plugged in. So does an Android phone (Android 14+) connected by cable with its USB mode set to <b>Webcam</b>.</p>
+          </div>
+        </article>
+
+        <article class="src-card" data-source="live-mobile" data-kind="phone">
+          <button type="button" class="src-head">
+            <span class="src-icon" aria-hidden="true"><i data-icon="phone"></i></span>
+            <span class="src-title"><span class="src-name">Mobile Camera</span><span class="src-state">Not connected</span></span>
+          </button>
+          <div class="src-body">
+            <div class="src-actions">
+              <button type="button" class="btn primary" id="qr-toggle"><i data-icon="qr"></i>Connect Mobile via QR</button>
+              <button type="button" class="btn" id="usb-phone"><i data-icon="usb"></i>Via USB cable</button>
+              <button type="button" class="btn src-stop" hidden>Disconnect</button>
+            </div>
+            <div id="qr-box" class="qr-box" hidden>
+              <img id="qr-img" alt="QR code to open the phone camera page">
+              <ol>
+                <li>Connect the phone to the same Wi-Fi as this computer.</li>
+                <li>Scan the code with the phone's camera.</li>
+                <li>The page uses a local certificate, so the browser warns once: tap <b>Advanced</b> → <b>Proceed</b> (Safari: <b>Show details</b> → <b>visit this website</b>).</li>
+                <li>Tap <b>Start camera</b> and allow camera access.</li>
+              </ol>
+              <code id="qr-url" class="qr-url"></code>
+            </div>
+            <p id="usb-msg" class="src-msg" hidden></p>
+            <div id="usb-help" class="usb-help" hidden>
+              <b>Connecting an Android phone by cable</b>
+              <ol>
+                <li>On the phone: <b>Settings → About phone</b>, tap <b>Build number</b> (Xiaomi/Redmi: <b>OS version</b>) 7 times to unlock Developer options.</li>
+                <li><b>Settings → Developer options</b> (Xiaomi: <b>Additional settings → Developer options</b>): turn on <b>USB debugging</b>.</li>
+                <li>Connect with a <b>data</b> cable (some cables only charge) and set the USB mode to <b>File transfer</b>.</li>
+                <li>Tap <b>Allow</b> on the "Allow USB debugging?" prompt, then press <b>Via USB cable</b> again.</li>
+              </ol>
+              <span>The camera page then opens on the phone: tap <b>Start camera</b>. It works best in Chrome. iPhones can't do this on Windows; use the QR code.</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="src-stage">
+        <div class="detail-head">
+          <h1 id="src-title"></h1>
+          <span id="src-lag" class="hint"></span>
+        </div>
+        <div id="src-feed" class="feed feed-large">
+          <canvas id="src-canvas"></canvas>
+          <span class="feed-time" id="src-time"></span>
+          <span class="alert-badge" id="src-alert" hidden></span>
+          <div id="src-empty" class="src-empty"></div>
+        </div>
+      </div>
+
+      <aside class="panel src-panel" aria-label="Detected objects">
+        <h2><i data-icon="eye"></i>Detected objects <span id="src-obj-count" class="count"></span></h2>
+        <ul id="src-objects" class="objects"></ul>
+        <p id="src-objects-empty" class="empty">No objects detected.</p>
+      </aside>
+      </div>
+    </section>
+  </main>
+
+  <template id="tile-template">
+    <button class="tile" type="button">
+      <div class="feed">
+        <canvas></canvas>
+        <span class="feed-time"></span>
+        <span class="alert-badge" hidden></span>
+      </div>
+      <div class="tile-foot">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="tile-name"></span>
+        <span class="tile-summary"></span>
+      </div>
+    </button>
+  </template>
+
+  <script src="/static/nav.js?v=2"></script>
+  <script src="/static/threat-ui.js?v=3"></script>
+  <script src="/static/threats.js?v=2"></script>
+  <script src="/static/capture.js?v=2"></script>
+  <script src="/static/sources.js?v=3"></script>
+  <script src="/static/app.js?v=6"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detection Modes · Rakshak AI</title>
+  <meta name="theme-color" content="#07090e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=9">
+  <link rel="stylesheet" href="/static/modes.css?v=5">
+</head>
+<body>
+  <header id="app-nav" data-page="modes"></header>
+
+  <main class="modes-page">
+    <section class="page-head">
+      <div>
+        <div class="eyebrow"><i data-icon="modes"></i>Robustness showcase</div>
+        <h1>Detection Modes</h1>
+        <p>The same live detection pipeline, running on real footage recorded in different light, sensor and weather conditions. Pick a condition to see it work.</p>
+      </div>
+      <div class="page-meta"><span class="chip"><i data-icon="shield"></i>No per-mode tuning</span></div>
+    </section>
+
+    <nav id="mode-cards" class="mode-cards" aria-label="Modes"></nav>
+
+    <section class="stage">
+      <div class="stage-main">
+        <div class="stage-head">
+          <div class="stage-title">
+            <h2 id="mode-name"></h2>
+            <span id="mode-tagline" class="muted"></span>
+          </div>
+          <div id="clip-switch" class="seg" role="group" aria-label="Footage"></div>
+        </div>
+        <div class="feed feed-large stage-feed">
+          <img id="poster" class="poster" alt="">
+          <canvas id="stage-canvas"></canvas>
+          <span class="live-chip"><span class="live-dot" aria-hidden="true"></span>Live detection</span>
+          <span class="feed-time" id="stage-time"></span>
+          <div id="loader" class="loader">
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Starting live analysis…</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel stage-panel" aria-label="Mode details">
+        <section class="about">
+          <h3><i data-icon="eye"></i>About this condition</h3>
+          <p id="mode-about"></p>
+          <ul id="mode-challenges" class="chips"></ul>
+        </section>
+
+        <section class="stats" aria-label="In view now">
+          <div class="stat"><span id="stat-people" class="stat-value">–</span><span class="stat-label">People</span></div>
+          <div class="stat"><span id="stat-vehicles" class="stat-value">–</span><span class="stat-label">Vehicles</span></div>
+          <div class="stat" id="stat-weapons-box"><span id="stat-weapons" class="stat-value">–</span><span class="stat-label">Weapons</span></div>
+          <div class="stat"><span id="stat-conf" class="stat-value">–</span><span class="stat-label">Avg. confidence</span></div>
+        </section>
+
+        <h2><i data-icon="eye"></i>Detected objects <span id="obj-count" class="count"></span></h2>
+        <ul id="objects" class="objects"></ul>
+        <p id="objects-empty" class="empty">Waiting for detections…</p>
+      </aside>
+    </section>
+
+    <p class="credits">Footage: <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a> (Pexels License) and the
+      <a href="https://mevadata.org" target="_blank" rel="noopener">MEVA dataset</a> (thermal cameras, CC BY 4.0).</p>
+  </main>
+
+  <script src="/static/nav.js?v=2"></script>
+  <script src="/static/modes.js?v=3"></script>
+</body>
+</html>

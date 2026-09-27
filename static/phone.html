@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07090e">
+  <title>Phone Camera · Rakshak AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/phone.css?v=2">
+</head>
+<body>
+  <header class="bar">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 4 5.8v5.7c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5.8z"/><path d="M7.5 12s1.7-3 4.5-3 4.5 3 4.5 3-1.7 3-4.5 3-4.5-3-4.5-3z"/><circle cx="12" cy="12" r="1.2"/></svg>
+    </span>
+    <span class="title">Rakshak AI<small>Phone camera</small></span>
+  </header>
+
+  <main>
+    <div class="eyebrow">Live source</div>
+    <h1>Stream this phone's camera</h1>
+    <p class="lead">Your video goes to the monitor, where it runs through the same live object and weapon detection as the CCTV cameras.</p>
+
+    <div class="preview">
+      <video id="preview" muted playsinline autoplay></video>
+      <span id="badge" class="badge" hidden>● Live</span>
+      <div id="placeholder" class="placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 13 5.2 3.1a.5.5 0 0 0 .8-.4V8.3a.5.5 0 0 0-.8-.4L16 11"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+        <span>Camera is off</span>
+      </div>
+    </div>
+
+    <p id="status" class="status" role="status">Tap Start camera and allow camera access.</p>
+
+    <div class="actions">
+      <button id="start" class="btn primary" type="button">Start camera</button>
+      <button id="stop" class="btn" type="button" hidden>Stop</button>
+      <button id="flip" class="btn" type="button" hidden>Switch camera</button>
+    </div>
+
+    <ul class="tips">
+      <li>Keep this page open while streaming.</li>
+      <li>Hold the phone sideways for the widest view.</li>
+      <li>The monitor shows the video a few seconds behind live, with detection boxes.</li>
+    </ul>
+  </main>
+
+  <script src="/static/capture.js?v=2"></script>
+  <script src="/static/phone.js?v=2"></script>
+</body>
+</html>

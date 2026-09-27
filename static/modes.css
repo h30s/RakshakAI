@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Detection modes page (/modes) — builds on style.css
+   ========================================================================== */
+.modes-page { display: flex; flex-direction: column; gap: 22px; }
+.modes-page > * { flex-shrink: 0; }
+.modes-page > .page-head { margin-bottom: 0; }
+
+/* ---------- Mode cards ---------- */
+.mode-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.mode-card {
+  position: relative; display: flex; flex-direction: column; text-decoration: none; color: inherit; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow);
+  transition: transform .25s var(--ease), border-color .2s, box-shadow .25s;
+}
+.mode-card:hover { transform: translateY(-3px); border-color: var(--border-2); box-shadow: 0 20px 44px rgba(0, 0, 0, .45); }
+.mode-card:focus-visible { box-shadow: var(--ring); }
+.mode-card.active { border-color: rgba(77, 141, 255, .7); box-shadow: 0 0 0 1px rgba(77, 141, 255, .45), 0 18px 44px rgba(77, 141, 255, .14); }
+.mode-thumb { position: relative; aspect-ratio: 16 / 9; background: #04060a; overflow: hidden; }
+.mode-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .78; transform: scale(1.02); transition: opacity .3s, transform .5s var(--ease); }
+.mode-card:hover .mode-thumb img, .mode-card.active .mode-thumb img { opacity: 1; transform: scale(1.06); }
+.mode-thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(8, 11, 16, .92)); }
+.mode-icon {
+  position: absolute; left: 12px; bottom: 10px; z-index: 1; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: rgba(8, 11, 16, .7); color: var(--text); border: 1px solid rgba(255, 255, 255, .12); backdrop-filter: blur(6px);
+}
+.mode-card.active .mode-icon { background: var(--primary); border-color: transparent; color: #fff; box-shadow: 0 6px 18px rgba(77, 141, 255, .45); }
+.mode-icon svg { width: 18px; height: 18px; }
+.mode-text { padding: 12px 14px 14px; }
+.mode-name { font-weight: 650; font-size: 15px; letter-spacing: -.01em; }
+.mode-tag { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+/* ---------- Stage: footage + panel ---------- */
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+.stage-main { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.stage-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.stage-title { display: flex; align-items: baseline; gap: 12px; }
+.stage-title h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.015em; }
+.stage-head .seg { margin: 0; min-width: 300px; }
+.stage-head .seg-btn { flex: 1 1 auto; padding: 7px 14px; }
+
+.stage-feed .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(3px) brightness(.45); transform: scale(1.04); }
+.stage-feed canvas { z-index: 1; }
+.live-chip {
+  position: absolute; top: 14px; left: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff;
+  background: rgba(5, 8, 12, .6); backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, .1);
+}
+.live-chip .live-dot { width: 7px; height: 7px; animation: live 2s ease-in-out infinite; }
+.stage-feed .feed-time { z-index: 2; }
+.loader { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--text); font-size: 14px; font-weight: 500; }
+.spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .14); border-top-color: var(--primary); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.stage-panel { gap: 18px; max-height: none; }
+.stage-panel > h2 { margin: 0; }
+.about { padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); }
+.about h3 { margin: 0 0 8px; display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.about h3 .ic { width: 15px; height: 15px; }
+.about p { margin: 0 0 12px; font-size: 13px; line-height: 1.55; color: var(--text-2); }
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chips li { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); }
+
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+.stat-value { font-size: 24px; font-weight: 750; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+.stat.alert { border-color: rgba(255, 92, 99, .55); background: var(--danger-soft); }
+.stat.alert .stat-value { color: #ff8a8f; }
+.stage-panel .objects { max-height: 460px; }
+
+.credits { margin: 0; font-size: 12px; color: var(--muted); }
+.credits a { color: var(--text-2); }
+
+@media (max-width: 1280px) { .mode-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1100px) { .stage { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+  /* one swipeable row of cards, so the footage stays near the top */
+  .mode-cards { display: flex; overflow-x: auto; gap: 10px; margin: 0 -16px; padding: 2px 16px 8px; scroll-padding: 0 16px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .mode-card { flex: 0 0 168px; scroll-snap-align: start; }
+  .mode-card:hover { transform: none; }
+  .stage-head .seg { min-width: 0; width: 100%; }
+}

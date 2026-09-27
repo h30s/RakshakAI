@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Threat Reports · Rakshak AI</title>
+  <meta name="theme-color" content="#07090e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=9">
+  <link rel="stylesheet" href="/static/threats.css?v=4">
+  <link rel="stylesheet" href="/static/reports.css?v=4">
+</head>
+<body>
+  <header id="app-nav" data-page="reports"></header>
+
+  <main class="reports">
+    <div class="page-head">
+      <div>
+        <div class="eyebrow"><i data-icon="reports"></i>Incident history</div>
+        <h1>Threat Reports</h1>
+        <p>Every threat the system has detected, with what was done about it and how long it took.</p>
+      </div>
+      <a id="export" class="btn primary" href="/api/threats/export.csv" download><i data-icon="download"></i>Export CSV</a>
+    </div>
+
+    <div class="rp-stats">
+      <div class="rp-stat"><span class="rp-ic"><i data-icon="reports"></i></span><div><span id="st-total">–</span><small>Total incidents</small></div></div>
+      <div class="rp-stat bad"><span class="rp-ic"><i data-icon="alert"></i></span><div><span id="st-active">–</span><small>Active</small></div></div>
+      <div class="rp-stat warn"><span class="rp-ic"><i data-icon="activity"></i></span><div><span id="st-progress">–</span><small>In progress</small></div></div>
+      <div class="rp-stat ok"><span class="rp-ic"><i data-icon="check"></i></span><div><span id="st-resolved">–</span><small>Resolved</small></div></div>
+      <div class="rp-stat"><span class="rp-ic"><i data-icon="clock"></i></span><div><span id="st-ttr">–</span><small>Avg. time to resolve</small></div></div>
+    </div>
+
+    <div class="rp-filters">
+      <input id="q" class="search" type="search" placeholder="Search camera, location, type or ID" autocomplete="off">
+      <div class="seg" role="group" aria-label="Status">
+        <button type="button" class="seg-btn active" data-status="all">All</button>
+        <button type="button" class="seg-btn" data-status="active">Active</button>
+        <button type="button" class="seg-btn" data-status="in_progress">In progress</button>
+        <button type="button" class="seg-btn" data-status="resolved">Resolved</button>
+      </div>
+      <select id="days" aria-label="Period">
+        <option value="1">Last 24 hours</option>
+        <option value="7">Last 7 days</option>
+        <option value="30">Last 30 days</option>
+        <option value="0" selected>All time</option>
+      </select>
+    </div>
+
+    <div class="rp-table-wrap">
+      <table class="rp-table">
+        <thead><tr>
+          <th>Date &amp; time</th><th>Camera</th><th>Location</th><th>Threat type</th><th class="num">Score</th>
+          <th>Status</th><th>Action taken</th><th>Resolved</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p id="empty" class="empty" hidden>No threats match.</p>
+    </div>
+  </main>
+
+  <script src="/static/nav.js?v=2"></script>
+  <script src="/static/threat-ui.js?v=3"></script>
+  <script src="/static/reports.js?v=2"></script>
+</body>
+</html>

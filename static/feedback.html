@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visitor Feedback · Rakshak AI</title>
+  <meta name="theme-color" content="#07090e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=9">
+  <link rel="stylesheet" href="/static/reports.css?v=4">
+  <style>
+    .fb-list { display: flex; flex-direction: column; gap: 14px; }
+    .fb-item { padding: 18px 20px; border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--border); }
+    .fb-top { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+    .fb-rating { font: 700 15px var(--mono); padding: 3px 10px; border-radius: 8px; background: var(--primary-soft); color: var(--primary-hover); }
+    .fb-who { font-weight: 600; }
+    .fb-meta { font-size: 12px; color: var(--muted); margin-left: auto; }
+    .fb-q { margin-top: 12px; font-size: 12px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .fb-a { margin-top: 4px; white-space: pre-wrap; color: var(--text-2); line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <header id="app-nav" data-page="feedback"></header>
+  <main class="reports">
+    <div class="page-head">
+      <div>
+        <div class="eyebrow"><i data-icon="message"></i>Visible only on this machine</div>
+        <h1>Visitor Feedback</h1>
+        <p>Responses submitted from the landing page, newest first.</p>
+      </div>
+    </div>
+    <div class="rp-stats" id="fb-stats"></div>
+    <div class="fb-list" id="fb-list"><p class="muted">Loading…</p></div>
+  </main>
+  <script src="/static/nav.js?v=2"></script>
+  <script>
+    const ROLE = { government: "Government or ministry", security: "Police, CAPF or defence", academia: "Research or faculty",
+      industry: "Security or technology industry", student: "Student", other: "Other" };
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    fetch("/api/feedback").then((r) => r.json()).then((items) => {
+      const avg = items.length ? (items.reduce((a, f) => a + f.rating, 0) / items.length).toFixed(1) : "–";
+      const tried = items.filter((f) => f.tried_demo).length;
+      const follow = items.filter((f) => f.follow_up).length;
+      document.getElementById("fb-stats").innerHTML = [
+        ["message", items.length, "Responses"], ["chart", avg, "Average rating (1–5)"],
+        ["eye", tried, "Tried the prototype"], ["user", follow, "Open to follow-up"],
+      ].map(([ic, v, l]) => `<div class="rp-stat"><span class="rp-ic">${icon(ic)}</span><div><span>${v}</span><small>${l}</small></div></div>`).join("");
+      document.getElementById("fb-list").innerHTML = items.length ? items.map((f) => `
+        <article class="fb-item">
+          <div class="fb-top"><span class="fb-rating">${f.rating}/5</span>
+            <span class="fb-who">${esc(f.name) || "Anonymous"}${f.organisation ? ` · ${esc(f.organisation)}` : ""}</span>
+            <span class="pill">${esc(ROLE[f.role] || f.role)}</span>
+            ${f.tried_demo ? '<span class="pill">Tried prototype</span>' : ""}
+            ${f.follow_up && f.email ? `<a href="mailto:${esc(f.email)}">${esc(f.email)}</a>` : f.email ? `<span class="muted">${esc(f.email)} (no follow-up)</span>` : ""}
+            <span class="fb-meta">${new Date(f.at * 1000).toLocaleString()}</span></div>
+          ${f.useful ? `<div class="fb-q">Most useful</div><div class="fb-a">${esc(f.useful)}</div>` : ""}
+          ${f.improve ? `<div class="fb-q">Missing or unconvincing</div><div class="fb-a">${esc(f.improve)}</div>` : ""}
+        </article>`).join("") : '<p class="muted">No feedback yet. The form is at the end of the <a href="/#feedback">landing page</a>.</p>';
+    }).catch(() => { document.getElementById("fb-list").innerHTML = '<p class="muted">Could not load feedback.</p>'; });
+  </script>
+</body>
+</html>

@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rakshak AI — Intelligent video analytics on existing CCTV</title>
+  <meta name="description" content="Rakshak AI is a software layer for the CCTV already installed at border outposts. It separates the ordinary movement of an open border from events that need attention, and turns them into alerts and records an officer can act on.">
+  <meta name="theme-color" content="#05070b">
+  <meta property="og:title" content="Rakshak AI — Don't replace the cameras. Make them intelligent.">
+  <meta property="og:description" content="Clutter-aware video analytics for border surveillance, built to run on existing CCTV and commodity hardware.">
+  <meta property="og:image" content="/static/site/shot-cameras.jpg">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%234d8dff'/%3E%3Cpath d='M12 4.5 6.5 6.8v4c0 3.5 2.3 6.2 5.5 7 3.2-.8 5.5-3.5 5.5-7v-4z' fill='none' stroke='white' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='11' r='1.6' fill='white'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+  <script>document.documentElement.classList.add("js")</script>
+  <link rel="stylesheet" href="/static/landing.css?v=4">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M12 2.5 4 5.8v5.7c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5.8z"/><path d="M7.5 12s1.7-3 4.5-3 4.5 3 4.5 3-1.7 3-4.5 3-4.5-3-4.5-3z"/><circle cx="12" cy="12" r="1.2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m10 8.5 5.5 3.5-5.5 3.5z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 7.5h11a2 2 0 0 1 2 2V16a2 2 0 0 1-2 2H3z"/><path d="m16 11 5-3v9l-5-3"/><path d="M6 21h6"/></symbol>
+    <symbol id="i-cctv" viewBox="0 0 24 24"><path d="M4.2 7.3 16.6 3.9l1.8 6.6-12.4 3.4z"/><path d="m18.4 10.5 2.6-.7M9 13l1.3 4.7H4M4 15v5.5"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2.5V6M15 2.5V6M9 18v3.5M15 18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 2.4 17.6A2 2 0 0 0 4.1 20.6h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4.5M12 17h.01"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+    <symbol id="i-bell-off" viewBox="0 0 24 24"><path d="M8.7 3.7A6 6 0 0 1 18 8.5c0 3 .7 5.2 1.6 6.6M6.3 6.4A6 6 0 0 0 6 8.5c0 5-2 7-2 7h11.5M10.3 20a2 2 0 0 0 3.4 0M3 3l18 18"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8.5a6 6 0 0 1 12 0c0 5 2 7 2 7H4s2-2 2-7"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 14l2 2 4-4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10.5" width="16" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5M12 15v2"/></symbol>
+    <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.1 4.9A10 10 0 1 0 22 12"/><path d="M15.5 8.5A5 5 0 1 0 17 12"/><path d="m12 12 7-7"/><circle cx="12" cy="12" r="1.2"/></symbol>
+    <symbol id="i-case" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+    <symbol id="i-lang" viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c.5 3 2.5 6 6 8M11 5c-.8 4-3.5 7.5-7 9"/><path d="m13 21 4-9 4 9M14.3 18h5.4"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+    <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M3 3l18 18M8.5 16.4a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 4.3-2.4M2 9.3A15 15 0 0 1 6.2 6.6M14.2 10.3a10 10 0 0 1 4.8 2.6M10.5 5.1A15 15 0 0 1 22 9.3M12 20h.01"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2v5M15 2v5M6 7h12v4a6 6 0 0 1-12 0zM12 17v5"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 5.3-5.3a4 4 0 0 1-5-5L8 6 4 2l-2 2 4 4"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 4 5.8v5.7c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V5.8z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3.5 3.5 0 0 0 6 0zM19 7l-3 7a3.5 3.5 0 0 0 6 0zM12 3l-2 2h4z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.5h.01"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.8A8 8 0 1 1 21 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M20 18v3"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top" aria-label="Rakshak AI, back to top">
+      <span class="brand-mark"><svg class="ic"><use href="#i-logo"/></svg></span>
+      <span class="brand-name">Rakshak AI</span>
+    </a>
+    <nav class="nav-links" id="nav-links" aria-label="Sections">
+      <a href="#problem">Problem</a>
+      <a href="#approach">Approach</a>
+      <a href="#how">How it decides</a>
+      <a href="#prototype">Prototype</a>
+      <a href="#deployment">Deployment</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#feedback" class="menu-only">Feedback</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn ghost sm" href="#feedback">Feedback</a>
+      <a class="btn primary sm" href="/app"><span class="lbl-long">Open the prototype</span><span class="lbl-short">Prototype</span><svg class="ic arrow"><use href="#i-arrow"/></svg></a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+        <svg class="ic i-open"><use href="#i-menu"/></svg><svg class="ic i-close"><use href="#i-close"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <!-- ============================== HERO ============================== -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="kicker reveal"><b>PS 26187</b> Video analytics for border surveillance on existing CCTV</div>
+        <h1 class="reveal d1">Don't replace the cameras.<br><span class="accent">Make them intelligent.</span></h1>
+        <p class="hero-lead reveal d2">Rakshak AI is a software layer for the CCTV already installed at border outposts and check posts. It analyses every feed, learns what ordinary movement looks like at each post, and brings forward only the events that need an officer's attention, each with its reasons and a record that holds up later.</p>
+        <div class="hero-actions reveal d3">
+          <a class="btn primary" href="/app"><svg class="ic"><use href="#i-play"/></svg>Explore the working prototype</a>
+          <a class="btn" href="#approach">How it works<svg class="ic arrow"><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="hero-status reveal d3">
+          <span class="tag run">Working today</span>
+          <span><strong>Detection, tracking, weapon alerts and incident logging</strong> on 13 camera feeds at once, on a 2016 laptop processor with no GPU.</span>
+          <span>Context-aware alerting and sealed evidence are the next build stage. <a href="#status">See exactly what is built →</a></span>
+        </div>
+      </div>
+      <div class="hero-visual reveal d2">
+        <div class="frame">
+          <div class="frame-bar"><i></i><i></i><i></i><span>rakshak · operations console · live</span></div>
+          <img src="/static/site/shot-cameras.jpg" alt="Rakshak AI operations console: a grid of live camera feeds with people, vehicles and weapons outlined by the detector" width="1440" height="900" fetchpriority="high">
+        </div>
+        <div class="float-card fc-alert">
+          <span class="fc-ic"><svg class="ic"><use href="#i-alert"/></svg></span>
+          <span><b>Knife · Entrance, Camera 2</b>Confirmed on two passes · held by a person</span>
+        </div>
+        <div class="float-card fc-cpu">
+          <span class="fc-ic"><svg class="ic"><use href="#i-cpu"/></svg></span>
+          <span><b>13 feeds · 1 CPU</b>Full pass every 2–3 s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- facts -->
+    <div class="wrap facts">
+      <div class="facts-grid reveal">
+        <div class="fact"><div class="fact-num">2,450<small>km</small></div><p>of open India–Nepal and India–Bhutan border guarded by the SSB<sup class="ref"><a href="#r1">1</a></sup></p></div>
+        <div class="fact"><div class="fact-num">734</div><p>SSB Border Out Posts on these two frontiers<sup class="ref"><a href="#r2">2</a></sup></p></div>
+        <div class="fact"><div class="fact-num">308</div><p>of those posts without road connectivity<sup class="ref"><a href="#r2">2</a></sup>. Hardware-heavy systems are hard to deliver and maintain there.</p></div>
+        <div class="fact"><div class="fact-num">173</div><p>people rescued from traffickers by the SSB on the India–Nepal border in 2023<sup class="ref"><a href="#r3">3</a></sup></p></div>
+      </div>
+      <p class="facts-note">Sources are listed at the end of the page.</p>
+    </div>
+  </section>
+
+  <!-- ============================== PROBLEM ============================== -->
+  <section class="section alt" id="problem">
+    <div class="wrap">
+      <div class="problem-top">
+        <div class="sec-head reveal">
+          <div class="eyebrow">01 · The problem</div>
+          <h2>On an open border, a crossing is not a signal. <span class="dim">It is the background.</span></h2>
+        </div>
+        <div class="prose reveal d1">
+          <p>Under the 1950 Treaty of Peace and Friendship, Indian and Nepali citizens cross without passport or visa, to work, to trade at weekly <em>haat</em> markets and to visit family<sup class="ref"><a href="#r4">4</a></sup>. Movement never stops, and it swells on market days and at festivals.</p>
+          <p>The SSB's task is to find the <strong>unlawful fraction inside that movement</strong>: smuggling, trafficking, contraband. In 2023 alone it seized over 11 lakh kg of contraband in 2,068 cases<sup class="ref"><a href="#r3">3</a></sup>. Almost every interception began with a person noticing something.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <article class="card reveal">
+          <div class="card-ic"><svg class="ic"><use href="#i-eye"/></svg></div>
+          <h3>Cameras that record but don't understand</h3>
+          <p>Conventional CCTV gives recording and a live view, and someone has to keep watching. Research on operator vigilance shows attention to multi-screen video drops within minutes. A widely cited industry figure puts missed activity at up to 95% after 22 minutes<sup class="ref"><a href="#r5">5</a></sup>.</p>
+        </article>
+        <article class="card reveal d1">
+          <div class="card-ic amber"><svg class="ic"><use href="#i-box"/></svg></div>
+          <h3>Intelligence that ships as hardware</h3>
+          <p>Face recognition, number-plate reading and intrusion analytics usually arrive as dedicated appliances and proprietary smart cameras. They are expensive to buy and to maintain, and hard to take to 308 posts that have no road.</p>
+        </article>
+        <article class="card reveal d2">
+          <div class="card-ic red"><svg class="ic"><use href="#i-bell-off"/></svg></div>
+          <h3>Alarms that nobody trusts</h3>
+          <p>A rule that fires whenever someone crosses a line fires all day on this border. Operators learn to ignore it, and then it gets switched off. The detector isn't the weak point. Treating ordinary movement as the event is.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== BASE RATE ============================== -->
+  <section class="section" id="insight">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">02 · The core insight</div>
+        <h2>A more accurate model can't fix this on its own. <span class="dim">The arithmetic shows why.</span></h2>
+        <p>Suppose a busy post sees 10,000 crossings in a period and 10 of them are unlawful. A detector that is right 99% of the time on both kinds still raises about 110 alerts, and about 100 of them are false. Try the numbers yourself.</p>
+      </div>
+
+      <div class="calc reveal">
+        <div class="calc-in">
+          <div class="seg" role="group" aria-label="Scenario">
+            <button type="button" class="on" data-preset="raw">Every crossing</button>
+            <button type="button" data-preset="context">Judged against the post's normal</button>
+          </div>
+          <div class="slider"><label for="c-total">Movements observed <output id="o-total"></output></label><input id="c-total" type="range" min="50" max="50000" step="50" value="10000"></div>
+          <div class="slider"><label for="c-bad">Of which unlawful <output id="o-bad"></output></label><input id="c-bad" type="range" min="1" max="100" step="1" value="10"></div>
+          <div class="slider"><label for="c-sens">Detector sensitivity <output id="o-sens"></output></label><input id="c-sens" type="range" min="80" max="99.9" step="0.1" value="99"></div>
+          <div class="slider"><label for="c-spec">Detector specificity <output id="o-spec"></output></label><input id="c-spec" type="range" min="90" max="99.9" step="0.1" value="99"></div>
+          <p class="calc-note" id="c-note">Every movement is a candidate, as with a virtual fence or tripwire.</p>
+        </div>
+        <div class="calc-out" aria-live="polite">
+          <div class="calc-big"><span class="num" id="r-false">91%</span><span class="lbl">of alerts reaching the operator are false alarms</span></div>
+          <div class="calc-rows">
+            <div><b id="r-alerts">110</b><span>alerts raised</span></div>
+            <div><b id="r-fp">100</b><span>false alarms</span></div>
+            <div><b id="r-tp">9.9</b><span>genuine events caught</span></div>
+          </div>
+          <div>
+            <div class="dots" id="dots" aria-hidden="true"></div>
+            <div class="dots-legend" style="margin-top:12px"><span class="t">Genuine alert</span><span>False alarm</span><span class="nb" style="margin-left:auto">each dot ≈ 1% of alerts</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight reveal">
+        <div class="card-ic"><svg class="ic"><use href="#i-target"/></svg></div>
+        <div>
+          <h3>We don't make the classifier better. We make the denominator smaller.</h3>
+          <p>The base rate works against even a good detector. The way out is to judge each movement against <strong>what is normal for this camera, at this hour, on this kind of day</strong>: its usual paths, its market days, its festival surges. Measured that way, 10,000 ordinary crossings shrink to a small set of genuinely unusual ones. Among those, a good detector becomes decisive. Radar engineers call the same idea CFAR, a constant false-alarm rate: the threshold follows local background levels, so the alert rate stays steady however busy the border gets.</p>
+          <p class="caveat">The second scenario is illustrative arithmetic, not a measured result. It assumes unlawful movement is unusual in context. Someone who moves with the crowd, on the usual path at the usual hour, stays in the background, and we say so plainly <a href="#trust">below</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== APPROACH ============================== -->
+  <section class="section alt" id="approach">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">03 · The approach</div>
+        <h2>Don't replace the infrastructure. <span class="dim">Add a layer on top of it.</span></h2>
+        <p>The cameras, cabling and control-room screens already exist. Rakshak AI adds one commodity computer at the post and software that turns those feeds into decisions and records. Nothing on the camera side changes.</p>
+      </div>
+
+      <div class="stack reveal">
+        <div class="stack-col">
+          <h3>Already at the post</h3>
+          <ul>
+            <li><svg class="ic"><use href="#i-cctv"/></svg>IP CCTV at outposts, check posts and border roads</li>
+            <li><svg class="ic"><use href="#i-server"/></svg>Recorders and control-room screens</li>
+            <li><svg class="ic"><use href="#i-users"/></svg>A few personnel with many duties besides watching screens</li>
+          </ul>
+        </div>
+        <div class="stack-col stack-core">
+          <h3>The Rakshak AI layer</h3>
+          <div class="core-layers">
+            <div class="layer"><b>Perception</b><span>Detect and track people, vehicles, animals and weapons in every frame</span></div>
+            <div class="layer"><b>Context</b><span>Zones, direction, dwell time, group movement, hour of the week</span></div>
+            <div class="layer"><b>Decision</b><span>Compare each movement with the post's learned normal; keep the alert rate within budget</span></div>
+            <div class="layer"><b>Evidence</b><span>Original frames sealed, logged tamper-evidently and ready for court</span></div>
+          </div>
+          <p class="note"><svg class="ic" style="width:16px;height:16px"><use href="#i-cpu"/></svg>One commodity box per post. No GPU, no cloud, no new cameras.</p>
+        </div>
+        <div class="stack-col">
+          <h3>What the unit gets</h3>
+          <ul>
+            <li><svg class="ic"><use href="#i-bell"/></svg>A short, ranked list of alerts, each with its reasons</li>
+            <li><svg class="ic"><use href="#i-route"/></svg>Incident timelines and movement across cameras</li>
+            <li><svg class="ic"><use href="#i-file"/></svg>Records that stand up as evidence</li>
+            <li><svg class="ic"><use href="#i-case"/></svg>A shift report that is already drafted</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow reveal" role="list" aria-label="From CCTV to actionable intelligence">
+        <div class="step" role="listitem"><div class="step-ic"><svg class="ic"><use href="#i-cctv"/></svg></div><h4>CCTV</h4><p>Existing IP cameras, USB cameras, phones and recorded footage.</p><span class="tag part">Partly built</span></div>
+        <div class="step" role="listitem"><div class="step-ic"><svg class="ic"><use href="#i-film"/></svg></div><h4>Video data</h4><p>Frames decoded, normalised and buffered, so every frame shown is the one analysed.</p><span class="tag run">Working</span></div>
+        <div class="step" role="listitem"><div class="step-ic"><svg class="ic"><use href="#i-cpu"/></svg></div><h4>AI analysis</h4><p>Object and weapon detection on a CPU, with no special hardware.</p><span class="tag run">Working</span></div>
+        <div class="step" role="listitem"><div class="step-ic"><svg class="ic"><use href="#i-scan"/></svg></div><h4>Detection</h4><p>Tracks, cross-camera journeys and behavioural context, judged against the post's normal.</p><span class="tag part">Partly built</span></div>
+        <div class="step" role="listitem"><div class="step-ic"><svg class="ic"><use href="#i-bell"/></svg></div><h4>Alerts</h4><p>One incident per event, with severity, reasons, sound and operator actions.</p><span class="tag run">Working</span></div>
+        <div class="step" role="listitem"><div class="step-ic"><svg class="ic"><use href="#i-case"/></svg></div><h4>Actionable intelligence</h4><p>Reports, history and export, plus sealed evidence and drafted paperwork.</p><span class="tag part">Partly built</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== HOW IT DECIDES ============================== -->
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">04 · How it decides</div>
+        <h2>Four design principles. <span class="dim">One idea, applied end to end.</span></h2>
+        <p>Detection models are widely available and interchangeable. What makes a system usable at a real post is how it decides, what it hands over and how much work it saves. Each principle below is marked with where it stands today.</p>
+      </div>
+
+      <div class="pillars">
+        <article class="card pillar reveal">
+          <div class="pillar-top"><div class="card-ic" style="margin:0"><svg class="ic"><use href="#i-radar"/></svg></div><span class="tag dev">In development</span></div>
+          <span class="pillar-num">PRINCIPLE 01</span>
+          <h3>Model the normal, not the threat</h3>
+          <p class="lead">Each post learns its own pattern of lawful movement, and an alert fires only when the evidence against that pattern is strong enough.</p>
+          <ul>
+            <li>The baseline is kept per camera, zone, hour of the week and calendar: market days, Dashain, Chhath. It stores counts, never images or identities.</li>
+            <li>Evidence builds up over distinct observations: zone entry, dwell, direction, group movement and rate for the hour. It does not accumulate frame by frame, so one long clip doesn't count many times.</li>
+            <li>The threshold is set from the post's own history so that false alarms stay near a chosen rate (conformal thresholding). A target budget of 12 alerts per operator per 8-hour shift covers market days too. Nothing is discarded: lower-ranked events go into the shift digest.</li>
+            <li>When there is too little history, the system says <em>insufficient data</em> and falls back to conservative fixed rules instead of inventing a baseline. It also detects when the world has changed (a new road, a moved market) and recommends recalibration instead of alerting for weeks.</li>
+          </ul>
+          <div class="today"><span class="tag run">Today</span><span>The prototype runs the conservative fixed-rule layer: weapon type × confidence, confirmed across two passes.</span></div>
+        </article>
+
+        <article class="card pillar reveal d1">
+          <div class="pillar-top"><div class="card-ic green" style="margin:0"><svg class="ic"><use href="#i-lock"/></svg></div><span class="tag dev">In development</span></div>
+          <span class="pillar-num">PRINCIPLE 02</span>
+          <h3>Every alert is evidence</h3>
+          <p class="lead">The output of the system is a record that can be produced in court, not only a notification.</p>
+          <ul>
+            <li>The original frame is kept for the record. Low-light enhancement runs only on the copy used for detection, so enhanced pixels never enter the evidence.</li>
+            <li>Clips are captured from before and after the event and sealed with a SHA-256 hash.</li>
+            <li>Events go into an append-only log where each entry carries the hash of the one before it. Any edit or deletion shows up at the exact entry where it happened.</li>
+            <li>A draft certificate under Section 63(4) of the Bharatiya Sakshya Adhiniyam, 2023, including the hash value, is prepared at capture<sup class="ref"><a href="#r6">6</a></sup>. The investigating officer reviews and signs it.</li>
+          </ul>
+          <div class="today"><span class="tag run">Today</span><span>Every incident keeps its snapshot, times, sightings and a full, timestamped history of operator actions.</span></div>
+        </article>
+
+        <article class="card pillar reveal">
+          <div class="pillar-top"><div class="card-ic amber" style="margin:0"><svg class="ic"><use href="#i-route"/></svg></div><span class="tag part">Partly built</span></div>
+          <span class="pillar-num">PRINCIPLE 03</span>
+          <h3>From alerts to cases</h3>
+          <p class="lead">Surveillance becomes useful to an investigation when events connect across cameras, hours and days.</p>
+          <ul>
+            <li>Repeated sightings fold into one incident with a timeline, not a stream of duplicate alarms.</li>
+            <li>Journeys are rebuilt across cameras, and a link is made only where a person could actually walk between them in the time available.</li>
+            <li>Recurring patterns are surfaced for the intelligence wing, for example the same place and the same hours several times in two weeks, always off the usual path.</li>
+            <li>Records are searched by a deterministic parser. No language model sits in the evidence path, so a search cannot invent an incident.</li>
+          </ul>
+          <div class="today"><span class="tag run">Today</span><span>Incidents are deduplicated with timelines, and journeys across five cameras can be tried in the prototype.</span></div>
+        </article>
+
+        <article class="card pillar reveal d1">
+          <div class="pillar-top"><div class="card-ic" style="margin:0"><svg class="ic"><use href="#i-users"/></svg></div><span class="tag plan">Designed</span></div>
+          <span class="pillar-num">PRINCIPLE 04</span>
+          <h3>Built for the unit, not for a demo</h3>
+          <p class="lead">A system gets switched off when it adds work. This one is designed to take work away and to be directed like any other collection asset.</p>
+          <ul>
+            <li><strong>Watch Orders:</strong> an officer acting on information picks cameras and a time window and raises sensitivity for that window only. The order is audited, expires automatically and ends with a report, including an honest "nothing observed".</li>
+            <li><strong>Shift report:</strong> at handover the system drafts the situation report, covering coverage, gaps, alerts, actions and sealed evidence. The sentry corrects and signs it.</li>
+            <li><strong>Unattended posts:</strong> an alert is a 30-second decision on a duty phone, with a local alarm. The digest covers the hours when nobody was watching.</li>
+            <li><strong>Language:</strong> screens and reports in Hindi and the regional language of the post. Court documents stay in English.</li>
+          </ul>
+          <div class="today"><span class="tag run">Today</span><span>Alerts already play a sound, and operators can mark them "Working on it" or "Resolved" and add notes.</span></div>
+        </article>
+      </div>
+
+      <!-- alert anatomy -->
+      <div class="anatomy">
+        <article class="card evidence reveal">
+          <div class="ev-head"><b>Why this alert fired</b><span>CAM-03 · 02:14 Tue · track #41 · person</span></div>
+          <div class="ev-body">
+            <div class="ev-row"><span class="v">+4.1</span><span class="k">RATE_ANOMALY</span><span class="d">2 crossings vs a learned rate of 0.3 for this camera, 02:00 Tuesdays (n = 21 nights)</span></div>
+            <div class="ev-row"><span class="v">+2.3</span><span class="k">OFF_PATH</span><span class="d">180 m from the nearest designated crossing point</span></div>
+            <div class="ev-row"><span class="v">+1.8</span><span class="k">ZONE_ENTRY</span><span class="d">Entered restricted zone "Ridge North"</span></div>
+            <div class="ev-row"><span class="v">+1.2</span><span class="k">GROUP</span><span class="d">Moving together with track #42: proximity, heading, speed</span></div>
+            <div class="ev-row"><span class="v">+0.9</span><span class="k">DWELL</span><span class="d">47 s stationary at the treeline</span></div>
+            <div class="ev-sum"><span>Evidence = 10.3</span><span>p = 0.008 against 1,240 past episodes at this camera and hour</span><span class="hit">α = 0.02 → ALERT</span></div>
+          </div>
+          <div class="ev-foot">Illustrative example of the planned alert format. The figures are not measurements. Every term is a named statistic that adds up, so an officer can explain the alert in a witness box.</div>
+        </article>
+        <div class="reveal d1">
+          <div class="phone" aria-label="Illustration of an alert on a duty phone">
+            <div class="phone-screen">
+              <div class="phone-top"><span>02:14</span><span>RAKSHAK</span></div>
+              <div class="ph-alert">
+                <div class="ph-thumb">
+                  <svg viewBox="0 0 160 120" aria-hidden="true"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f1a2a"/><stop offset="1" stop-color="#070b12"/></linearGradient></defs><rect width="160" height="120" fill="url(#g1)"/><path d="M0 84 Q40 70 80 78 T160 70 V120 H0z" fill="#0d1520"/><path d="M0 60 L20 40 L34 52 L50 30 L70 55 L0 70z" fill="#0b121b"/><g fill="#9fb3cc" opacity=".55"><circle cx="94" cy="62" r="3"/><rect x="91.5" y="65" width="5" height="11" rx="2"/><circle cx="106" cy="64" r="3"/><rect x="103.5" y="67" width="5" height="10" rx="2"/></g><rect x="86" y="56" width="27" height="24" fill="none" stroke="#ff5c63" stroke-width="1.4"/><text x="86" y="53" fill="#ff8a8f" font-size="7" font-family="monospace">2 persons</text></svg>
+                </div>
+                <div class="ph-meta">CAM-03 · Ridge North</div>
+                <div class="ph-title">2 people, night, off the usual path</div>
+                <div class="ph-conf">At this confidence, <b>4 in 5</b> alerts were genuine</div>
+                <div class="ph-btns"><span>Seen</span><span class="p">Send team</span><span class="w">Not a threat</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="phone-cap">Illustration. Designed for posts with nobody at a screen: one image, one reason, one honest confidence and three buttons. "Not a threat" teaches the system.</p>
+        </div>
+      </div>
+
+      <div class="sec-head reveal" style="margin:90px 0 26px">
+        <h2 style="font-size:clamp(24px,2.6vw,32px)">How this differs from conventional intrusion analytics</h2>
+      </div>
+      <div class="table-wrap reveal">
+        <table class="cmp stackable">
+          <thead><tr><th></th><th>Conventional intrusion analytics</th><th>Rakshak AI</th></tr></thead>
+          <tbody>
+            <tr><td>What triggers an alert</td><td>Someone crosses a line or enters a zone</td><td>Evidence builds up against this post's learned normal until it is enough</td></tr>
+            <tr><td>Threshold</td><td>Tuned by hand, the same everywhere</td><td>Set per camera and hour from local history</td></tr>
+            <tr><td>Alert volume</td><td>Found out in the field, usually too late</td><td>A design parameter held within a stated budget, busy days included</td></tr>
+            <tr><td>Confidence shown</td><td>A score such as "87/100"</td><td>A calibrated frequency: "4 in 5 at this level were genuine"</td></tr>
+            <tr><td>When the world changes</td><td>A new road means weeks of false alarms</td><td>The shift is detected as drift and recalibration is recommended</td></tr>
+            <tr><td>When data is thin</td><td>Guesses silently</td><td>Reports "insufficient data" and uses conservative rules</td></tr>
+            <tr><td>What is handed over</td><td>An exported video clip</td><td>A sealed clip, a hash-chained log and a drafted Section 63 certificate</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== PROTOTYPE ============================== -->
+  <section class="section alt" id="prototype">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">05 · What runs today</div>
+        <h2>A working system you can open, <span class="dim">not a mock-up.</span></h2>
+        <p>The prototype is live software. Every screen below is a real capture, and every capability in this section can be tried in it. It is the perception and alerting base that the decision and evidence layers are being built on.</p>
+      </div>
+
+      <div class="proof reveal">
+        <div><b>13</b><span>camera feeds analysed together in one shared pipeline</span></div>
+        <div><b>2–3 s</b><span>for a full detection pass over all 13 feeds (measured on this laptop)</span></div>
+        <div><b>No GPU</b><span>everything runs on a 2016 dual-core laptop CPU (Intel i7-6600U)</span></div>
+        <div><b>5</b><span>visibility conditions tested: day, night, thermal, fog, rain and snow</span></div>
+      </div>
+
+      <div class="gallery reveal" id="gallery">
+        <div class="g-tabs" role="tablist" aria-label="Prototype screens"></div>
+        <div class="g-body">
+          <div class="g-shot" id="g-shot"></div>
+          <div class="g-text" id="g-text" role="tabpanel"></div>
+        </div>
+      </div>
+
+      <div class="caps">
+        <article class="card cap reveal"><h3><svg class="ic"><use href="#i-scan"/></svg>People, vehicles and objects</h3><p>A YOLOv8n model running on ONNX Runtime detects people, cars, buses, trucks, motorcycles, animals and dozens of other everyday objects (80 classes) on every feed, all on a CPU.</p></article>
+        <article class="card cap reveal d1"><h3><svg class="ic"><use href="#i-alert"/></svg>Weapons, with false-alarm filtering</h3><p>A dedicated model detects guns, knives, grenades and explosions. A weapon counts only if it is seen on two passes and a hand-held one sits inside a detected person, which rules out one-frame errors.</p></article>
+        <article class="card cap reveal d2"><h3><svg class="ic"><use href="#i-route"/></svg>Journeys across cameras</h3><p>Every person gets an ID. Across five synchronised cameras, appearance matching links a person only between cameras they could walk between, and a timing check rules out being in two places at once.</p></article>
+        <article class="card cap reveal"><h3><svg class="ic"><use href="#i-bell"/></svg>Incidents, not alarm floods</h3><p>One incident per camera and threat type, with severity, a sound alert, "Working on it" and "Resolved" actions, notes and a complete history. Incidents survive restarts and export to CSV.</p></article>
+        <article class="card cap reveal d1"><h3><svg class="ic"><use href="#i-qr"/></svg>Any camera, one pipeline</h3><p>Recorded CCTV, laptop and USB webcams, and phone cameras over the local network (scan a QR code) or a USB cable. You can switch sources without restarting, and every source goes through the same detection and alerts.</p></article>
+        <article class="card cap reveal d2"><h3><svg class="ic"><use href="#i-server"/></svg>Honest display and camera health</h3><p>Video is shown a few seconds behind live so boxes are drawn on the exact frames that were analysed. Each camera reports Online, Signal problem or Offline, and a stalled detector is flagged.</p></article>
+      </div>
+
+      <div class="honest reveal">
+        <svg class="ic"><use href="#i-info"/></svg>
+        <p><strong>What the prototype is not yet.</strong> It reads recorded footage, webcams and phones. Direct RTSP/ONVIF ingestion from IP cameras is the first item in the next build stage. Its alerts come from fixed rules, not yet from a learned baseline. Footage is from public datasets and stock sources, not from a border post. Throughput figures are from a laptop that is also serving the dashboard.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== STATUS ============================== -->
+  <section class="section" id="status">
+    <div class="wrap">
+      <div class="req-head">
+        <div class="sec-head reveal" style="margin-bottom:0">
+          <div class="eyebrow">06 · Requirement by requirement</div>
+          <h2>Where each requirement stands</h2>
+          <p>Every capability the problem statement asks for, and its status in Rakshak AI today. Nothing here is rounded up.</p>
+        </div>
+        <div class="legend reveal"><span class="tag run">Working in prototype</span><span class="tag part">Partly built</span><span class="tag dev">In development</span><span class="tag plan">Designed</span></div>
+      </div>
+      <div class="table-wrap req reveal">
+        <table class="stackable">
+          <thead><tr><th>Requirement</th><th>Status</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Human detection and tracking</td><td><span class="tag run">Working</span></td><td>Detection on every feed; per-camera IDs; journeys across five synchronised cameras.</td></tr>
+            <tr><td>Vehicle detection and classification</td><td><span class="tag part">Partly built</span></td><td>Cars, buses, trucks, motorcycles and bicycles are detected and labelled. Per-vehicle analytics such as counts, direction and dwell are next.</td></tr>
+            <tr><td>Night-time movement detection</td><td><span class="tag part">Partly built</span></td><td>The unchanged pipeline is shown on night, thermal, fog and rain footage. Low-light enhancement (on an analysis copy only) and per-condition measurement are next.</td></tr>
+            <tr><td>Real-time alerts and event logging</td><td><span class="tag run">Working</span></td><td>Incidents with severity, sound, operator actions, a history log, snapshots, reports and CSV export.</td></tr>
+            <tr><td>Suspicious activity detection</td><td><span class="tag part">Partly built</span></td><td>Weapon detection works. Dwell, direction, group movement and the per-post baseline are in development.</td></tr>
+            <tr><td>Ingest from standard IP cameras</td><td><span class="tag dev">In development</span></td><td>The pipeline already takes any frame source (files, webcams, phones). RTSP/ONVIF with auto-reconnect and gap logging is the next item.</td></tr>
+            <tr><td>Virtual fence intrusion detection</td><td><span class="tag dev">In development</span></td><td>Zones and directional tripwires drawn on the live view, used as <em>one input</em> to the decision rather than a direct alarm, because on an open border crossing is normal.</td></tr>
+            <tr><td>Face detection</td><td><span class="tag plan">Designed</span></td><td>Detection on by default. Recognition is a separate module, off by default, and enabled only by an audited administrative action.</td></tr>
+            <tr><td>Automatic number plate recognition</td><td><span class="tag plan">Designed</span></td><td>Plate location and OCR for Indian formats, with accuracy on clean and degraded footage reported separately.</td></tr>
+            <tr><td>Integration with command and control</td><td><span class="tag part">Partly built</span></td><td>The console already runs on REST and WebSocket APIs. A documented integration API for outside systems is designed.</td></tr>
+            <tr><td>No dedicated surveillance hardware</td><td><span class="tag run">Working</span></td><td>Everything above runs on an ordinary laptop CPU with no GPU and no special cameras.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== DEPLOYMENT ============================== -->
+  <section class="section alt" id="deployment">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">07 · Deployment</div>
+        <h2>Built for posts with no road, <span class="dim">no network and no engineer.</span></h2>
+        <p>The design assumes the hardest post, not the easiest: intermittent power, no reliable link and nobody trained in IT. Everything else is easier.</p>
+      </div>
+      <div class="deploy">
+        <div class="card topo reveal">
+          <div class="topo-posts">
+            <div class="topo-node"><h4><svg class="ic"><use href="#i-cctv"/></svg>BOP</h4><p>Existing cameras + one box</p></div>
+            <div class="topo-node"><h4><svg class="ic"><use href="#i-cctv"/></svg>BOP</h4><p>Runs fully offline</p></div>
+            <div class="topo-node"><h4><svg class="ic"><use href="#i-cctv"/></svg>BOP</h4><p>Syncs when the link returns</p></div>
+          </div>
+          <div class="topo-link"><span>metadata, thumbnails and sealed clips only<br>never raw video</span></div>
+          <div class="topo-node topo-hq">
+            <h4><svg class="ic"><use href="#i-server"/></svg>Sector / Frontier HQ</h4>
+            <p>Cross-post view, journeys and recurring patterns, Watch Order management, access control and audit. Alerts go on to existing command-and-control systems through a documented API.</p>
+          </div>
+        </div>
+        <div class="dep-list">
+          <div class="dep-item reveal"><div class="card-ic"><svg class="ic"><use href="#i-cpu"/></svg></div><div><h4>Commodity compute, no GPU</h4><p>A mini-PC class machine per post. The prototype already runs 13 feeds on a 2016 laptop CPU. A real post needs 4–6 cameras per box.</p></div></div>
+          <div class="dep-item reveal d1"><div class="card-ic"><svg class="ic"><use href="#i-wifi-off"/></svg></div><div><h4>Offline by default</h4><p>All analysis happens at the post with a local store. Data is kept and forwarded when a link exists. It can run air-gapped with no cloud dependency.</p></div></div>
+          <div class="dep-item reveal d2"><div class="card-ic"><svg class="ic"><use href="#i-plug"/></svg></div><div><h4>Works with what is installed</h4><p>IP cameras over RTSP/ONVIF, plus USB cameras, phones and recorded files. No camera replacement and no proprietary appliance.</p></div></div>
+          <div class="dep-item reveal d3"><div class="card-ic"><svg class="ic"><use href="#i-wrench"/></svg></div><div><h4>Set up and maintained by the post</h4><p>A single-package install. Zones are drawn over the live view. Cameras report their own problems, such as a blocked lens, lost focus or signal loss.</p></div></div>
+        </div>
+      </div>
+
+      <div class="cost reveal">
+        <div class="cost-big">
+          <span class="k">Estimated cost</span>
+          <span class="v">≈ ₹2.4 cr</span>
+          <p>to equip all 734 SSB Border Out Posts once with a Rakshak Edge Box (about ₹32,500 per post), on cameras the force already owns. No per-camera licence and no recurring cloud bill.</p>
+        </div>
+        <div>
+          <table>
+            <tbody>
+              <tr><td>Intel N100 mini-PC board (4-core, fanless)</td><td>₹13,000</td></tr>
+              <tr><td>16 GB RAM + 512 GB NVMe SSD</td><td>₹8,000</td></tr>
+              <tr><td>4-port PoE+ switch for the cameras</td><td>₹3,500</td></tr>
+              <tr><td>12 V mini-UPS, IP65 enclosure, 4G modem, cables</td><td>₹8,000</td></tr>
+              <tr><td>Cameras · software licence · cloud</td><td>₹0</td></tr>
+              <tr class="total"><td>Edge Box per post, one time</td><td>≈ ₹32,500</td></tr>
+            </tbody>
+          </table>
+          <p class="fine">An indicative estimate at 2026 retail prices, excluding GST and installation; not a quotation. The box is a reference build from off-the-shelf parts that can be bought through standard government procurement.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== TRUST ============================== -->
+  <section class="section" id="trust">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">08 · Responsible by design</div>
+        <h2>The system detects and explains. <span class="dim">A person decides.</span></h2>
+        <p>Most people in frame on this border are crossing lawfully. The design treats that as a constraint on the architecture, not a policy footnote.</p>
+      </div>
+      <div class="trust-grid">
+        <article class="card reveal"><div class="card-ic"><svg class="ic"><use href="#i-hand"/></svg></div><h3>No autonomous decisions</h3><p>Rakshak AI detects, explains and records. An officer decides. Every action is attributable. Enabling recognition or changing retention needs a second person.</p></article>
+        <article class="card reveal d1"><div class="card-ic green"><svg class="ic"><use href="#i-shield"/></svg></div><h3>Lawful movement leaves no identity record</h3><p>The baseline stores counts per time slot, never faces, images or names. Detection is on by default. Recognition is an exception: off unless enabled, audited and kept on a shorter retention schedule.</p></article>
+        <article class="card reveal d2"><div class="card-ic amber"><svg class="ic"><use href="#i-scale"/></svg></div><h3>No new surveillance powers</h3><p>It reads footage the force already collects lawfully on its own cameras. Records use neutral language, for example "restricted area entry", never "confirmed infiltrator".</p></article>
+      </div>
+      <div class="limit reveal">
+        <div class="card-ic amber"><svg class="ic"><use href="#i-info"/></svg></div>
+        <div>
+          <h3>What it will not catch, stated plainly</h3>
+          <p>Someone who moves with the crowd, at market hour, on the usual path and carrying an ordinary bag, looks like the background. By design they will not be flagged. That is why Rakshak AI is one stream among several, alongside patrols and human sources. It is also why an officer with a tip-off can direct it with a Watch Order. The system shows its own blind spots through the shift digest, camera-health reports and the "insufficient data" state, so nobody mistakes it for an oracle.</p>
+        </div>
+      </div>
+
+      <div class="sec-head reveal" style="margin:90px 0 26px">
+        <div class="eyebrow">Validation</div>
+        <h2 style="font-size:clamp(24px,2.6vw,34px)">The acceptance test we propose, <span class="dim">including when to reject us.</span></h2>
+        <p>A 30-day pilot at one Border Out Post, on existing cameras, scored by the unit, not by us. The criteria are fixed before the test runs.</p>
+      </div>
+      <div class="table-wrap oat reveal">
+        <table class="stackable">
+          <thead><tr><th>#</th><th>Criterion</th><th>Pass condition</th><th>If it fails</th></tr></thead>
+          <tbody>
+            <tr><td>OAT-1</td><td>Alert volume</td><td>≤ 12 alerts per operator per 8-hour shift, sustained through a market day or festival surge</td><td><span class="verdict reject">Reject</span></td></tr>
+            <tr><td>OAT-2</td><td>Alert precision</td><td>≥ 50% of alerts judged operationally meaningful by the duty commander</td><td><span class="verdict reject">Reject</span></td></tr>
+            <tr><td>OAT-3</td><td>Calibration</td><td>Stated confidence matches observed outcomes (expected calibration error ≤ 0.1)</td><td><span class="verdict soft">Recalibrate, retest</span></td></tr>
+            <tr><td>OAT-4</td><td>Missed events</td><td>Every event the unit independently knew of appears in the digest, even if it didn't interrupt the operator</td><td><span class="verdict reject">Reject</span></td></tr>
+            <tr><td>OAT-5</td><td>Evidence integrity</td><td>Every seal and the full log chain verify at month end</td><td><span class="verdict reject">Reject</span></td></tr>
+            <tr><td>OAT-6</td><td>Availability</td><td>≥ 95% of camera-hours processed, with every gap logged</td><td><span class="verdict soft">Investigate</span></td></tr>
+            <tr><td>OAT-7</td><td>Adoption</td><td>Still switched on, unprompted, on day 30</td><td><span class="verdict reject">Reject</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="oat-foot">
+        <article class="card reveal"><h3>The headline claim needs no labelled data</h3><p>A false-alarm rate is a property of ordinary traffic, so it can be checked on unlabelled footage from the post itself. No labelled dataset of border smuggling exists, so an approach whose central claim depends on one can't be verified.</p></article>
+        <article class="card reveal d1"><h3>Detection rate is measured separately</h3><p>How often real events are caught is measured on staged, logged events and reported as that, never mixed into field figures. Every number we publish comes with its sample size.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== ROADMAP ============================== -->
+  <section class="section alt" id="roadmap">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="eyebrow">09 · Roadmap</div>
+        <h2>What exists, what is next, <span class="dim">and how it gets proven.</span></h2>
+      </div>
+      <div class="roadmap">
+        <article class="card phase now reveal"><span class="when">Now · Sep 2026</span><h3>Working prototype</h3><ul><li>Detection of people, vehicles and objects</li><li>Weapon alerts with false-alarm filtering</li><li>Tracking and cross-camera journeys</li><li>Incidents, actions, reports, export</li><li>Webcam and phone sources, condition tests</li></ul></article>
+        <article class="card phase next reveal d1"><span class="when">Next · Oct–Nov 2026</span><h3>Decision and evidence core</h3><ul><li>RTSP/ONVIF camera ingestion</li><li>Zones, dwell, direction, group movement</li><li>Per-post baseline, adaptive threshold, alert budget, shift digest</li><li>Sealed clips, hash-chained log, Section 63 draft</li><li>Watch Orders and the drafted shift report</li><li>Measurements on our own fixed-camera footage</li></ul></article>
+        <article class="card phase reveal d2"><span class="when">Pilot · 0–6 months</span><h3>One frontier, real posts</h3><ul><li>2–3 Border Out Posts on existing cameras</li><li>30 days against the acceptance test, scored by the unit</li><li>Face detection and number-plate reading added</li><li>Hindi and regional-language interface</li></ul></article>
+        <article class="card phase reveal d3"><span class="when">6–18 months</span><h3>Scale and integrate</h3><ul><li>Thermal and ground sensors under the same statistical framework</li><li>New posts starting from priors pooled across similar posts (statistics only, no video)</li><li>Integration with command-and-control systems</li><li>A hardened edge appliance</li></ul></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== DEMO ============================== -->
+  <section class="section" id="demo">
+    <div class="wrap">
+      <div class="demo reveal">
+        <div>
+          <div class="eyebrow">10 · See it working</div>
+          <h2>Open the prototype and try it yourself.</h2>
+          <p class="lead">It runs live: 13 camera feeds, weapon alerts, journeys across cameras, and detection in night, thermal and fog footage. You can also connect your own phone camera.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="/app"><svg class="ic"><use href="#i-play"/></svg>Open the prototype</a>
+            <a class="btn" href="#feedback">Share feedback afterwards</a>
+          </div>
+        </div>
+        <ol class="tour">
+          <li><div><b><a href="/app#overview">Overview</a></b><span>The threat score, active incidents, camera health and recent alerts on one screen.</span></div></li>
+          <li><div><b><a href="/app#cameras">Cameras</a></b><span>Open the Parking or Entrance feeds to see weapon detection and its confirmation.</span></div></li>
+          <li><div><b><a href="/app#people">People</a></b><span>Pick a person from the School Building and follow them across five cameras.</span></div></li>
+          <li><div><b><a href="/modes">Detection Modes</a></b><span>Run the same pipeline on night, thermal, fog and rain footage.</span></div></li>
+          <li><div><b><a href="/app#sources">Sources</a></b><span>Scan the QR code to stream your phone's camera into the same pipeline.</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== FEEDBACK ============================== -->
+  <section class="section alt" id="feedback">
+    <div class="wrap fb">
+      <div class="fb-side reveal">
+        <div class="eyebrow">11 · Your feedback</div>
+        <h2 style="font-size:clamp(28px,3.2vw,40px);letter-spacing:-.03em">Tell us what holds up, and what doesn't.</h2>
+        <p>We are building this for people who run, study and secure real surveillance systems. A candid view from you is worth more to us than praise.</p>
+        <ul>
+          <li><svg class="ic"><use href="#i-check"/></svg>Takes about two minutes. Only your role and rating are required.</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Stored on the team's machine only. It isn't shared or published.</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Leave contact details only if you want us to follow up.</li>
+        </ul>
+      </div>
+      <div class="card reveal d1" style="padding:0">
+        <form class="fb-form" id="fb-form" novalidate>
+          <div class="field">
+            <label for="fb-role">Your role</label>
+            <select id="fb-role" name="role" required>
+              <option value="">Select…</option>
+              <option value="government">Government or ministry</option>
+              <option value="security">Police, CAPF or defence</option>
+              <option value="academia">Research or faculty</option>
+              <option value="industry">Security or technology industry</option>
+              <option value="student">Student</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fb-org">Organisation <span class="opt">(optional)</span></label>
+            <input id="fb-org" name="organisation" type="text" maxlength="120" autocomplete="organization">
+          </div>
+          <div class="field full">
+            <span class="flabel" id="fb-rating-l">How useful could this be in real operations?</span>
+            <div class="stars" role="radiogroup" aria-labelledby="fb-rating-l">
+              <input type="radio" name="rating" id="r1" value="1"><label for="r1">1<small>Not useful</small></label>
+              <input type="radio" name="rating" id="r2" value="2"><label for="r2">2<small>Limited</small></label>
+              <input type="radio" name="rating" id="r3" value="3"><label for="r3">3<small>Promising</small></label>
+              <input type="radio" name="rating" id="r4" value="4"><label for="r4">4<small>Useful</small></label>
+              <input type="radio" name="rating" id="r5" value="5"><label for="r5">5<small>Deploy it</small></label>
+            </div>
+          </div>
+          <div class="field full">
+            <label for="fb-useful">What was most convincing or useful? <span class="opt">(optional)</span></label>
+            <textarea id="fb-useful" name="useful" maxlength="2000"></textarea>
+          </div>
+          <div class="field full">
+            <label for="fb-improve">What is missing, unclear or unconvincing? <span class="opt">(optional)</span></label>
+            <textarea id="fb-improve" name="improve" maxlength="2000"></textarea>
+          </div>
+          <div class="field">
+            <label for="fb-name">Name <span class="opt">(optional)</span></label>
+            <input id="fb-name" name="name" type="text" maxlength="80" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="fb-email">Email <span class="opt">(optional)</span></label>
+            <input id="fb-email" name="email" type="email" maxlength="120" autocomplete="email">
+          </div>
+          <div class="field full" style="gap:12px">
+            <label class="check"><input type="checkbox" name="tried_demo" id="fb-demo">I tried the live prototype</label>
+            <label class="check"><input type="checkbox" name="follow_up" id="fb-follow">You may contact me about this feedback</label>
+          </div>
+          <div class="fb-actions">
+            <button class="btn primary" type="submit" id="fb-submit"><svg class="ic"><use href="#i-msg"/></svg>Send feedback</button>
+            <span class="fb-msg" id="fb-msg" role="status"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== REFERENCES ============================== -->
+  <section class="refs" id="references">
+    <div class="wrap">
+      <h2>Sources</h2>
+      <ol>
+        <li id="r1">Ministry of Home Affairs, Department of Border Management: India–Nepal border 1,751 km; India–Bhutan border 699 km, both guarded by the Sashastra Seema Bal.</li>
+        <li id="r2">The Tribune, "308 SSB outposts on Nepal, Tibet borders await road connectivity": 734 outposts on the two borders, 426 with road connectivity. <a href="https://www.tribuneindia.com/news/india/308-ssb-outposts-on-nepal-tibet-borders-await-road-connectivity" rel="noopener" target="_blank">tribuneindia.com</a></li>
+        <li id="r3">SSB figures for 2023 on the India–Nepal border as reported by IANS: 144.5 kg of narcotics (66 cases), 11,11,054 kg of contraband (2,241 arrests, 2,068 cases), 83 men and 90 women rescued from traffickers. <a href="https://www.prokerala.com/news/articles/a1489619.html" rel="noopener" target="_blank">prokerala.com</a></li>
+        <li id="r4">Treaty of Peace and Friendship between India and Nepal, 1950.</li>
+        <li id="r5">Up to 45% of activity missed after 12 minutes and 95% after 22 minutes: an industry figure widely attributed to Ainsworth (2002). It is often repeated and not rigorously established. On operator vigilance and workload, see Dadashi et al., "Semi-automated CCTV surveillance", <em>Applied Ergonomics</em> (2013). <a href="https://sciencedirect.com/science/article/abs/pii/S0003687012000695" rel="noopener" target="_blank">sciencedirect.com</a></li>
+        <li id="r6">Bharatiya Sakshya Adhiniyam, 2023, Section 63: admissibility of electronic records; the Section 63(4) certificate includes the hash value of the record. <a href="https://indiankanoon.org/doc/125020475/" rel="noopener" target="_blank">indiankanoon.org</a>. Its validity was upheld by the Supreme Court in July 2026. <a href="https://www.scconline.com/blog/post/2026/07/08/sc-upholds-admissibility-of-electronic-evidence-under-section-63-4-bsa/" rel="noopener" target="_blank">scconline.com</a></li>
+        <li id="r7">Methods: CFAR detection (cell-averaging and order-statistic); inductive and Mondrian conformal prediction (Vovk et al.); CUSUM and Page–Hinkley change detection; isotonic calibration and expected calibration error; YOLOv8 (Ultralytics); OSNet person re-identification; MEVA multi-camera dataset (school-building feeds).</li>
+      </ol>
+      <p class="integrity"><strong style="color:var(--text-2)">How we use numbers.</strong> Every figure about Rakshak AI on this page is one of three things: measured on the prototype, labelled as a design target, or labelled as an estimate. External figures carry a source. The worked alert example is illustrative and says so.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>
+      <a class="brand" href="#top"><span class="brand-mark"><svg class="ic"><use href="#i-logo"/></svg></span><span class="brand-name">Rakshak AI</span></a>
+      <p>Clutter-aware video analytics on existing CCTV. Developed in response to Problem Statement 26187, <em>AI-Based Intelligent Video Analytics Platform for Border Surveillance using Existing CCTV Infrastructure</em>, from the Ministry of Home Affairs (Sashastra Seema Bal, Police II Division), Smart India Hackathon 2026.</p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="/app">Prototype</a>
+      <a href="/modes">Detection Modes</a>
+      <a href="/reports">Reports</a>
+      <a href="#feedback">Feedback</a>
+      <a href="#references">Sources</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="/static/landing.js?v=5"></script>
+</body>
+</html>
