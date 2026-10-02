@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ranked Alerts · Rakshak AI</title>
+  <meta name="theme-color" content="#07090e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=9">
+  <link rel="stylesheet" href="/static/threats.css?v=4">
+  <link rel="stylesheet" href="/static/reports.css?v=4">
+  <link rel="stylesheet" href="/static/decision.css?v=2">
+</head>
+<body>
+  <header id="app-nav" data-page="decision"></header>
+
+  <main class="reports decision">
+    <div class="page-head">
+      <div>
+        <div class="eyebrow"><i data-icon="shield"></i><span data-i18n>Alert budget</span></div>
+        <h1 data-i18n>Ranked Alerts</h1>
+        <p data-i18n>Only the movements that are most unusual for this post, this hour and this kind of day reach the operator,
+          at most a fixed number per shift. Everything else is kept in the shift digest.</p>
+      </div>
+      <div class="dc-head-actions">
+        <button class="btn" type="button" data-lang-toggle>हिन्दी</button>
+        <button id="verify" class="btn" type="button"><i data-icon="check"></i><span data-i18n>Verify ledger</span></button>
+      </div>
+    </div>
+
+    <div class="rp-stats">
+      <div class="rp-stat"><span class="rp-ic"><i data-icon="activity"></i></span><div><span id="st-mode">–</span><small id="st-mode-sub" data-i18n>Mode</small></div></div>
+      <div class="rp-stat bad"><span class="rp-ic"><i data-icon="bell"></i></span><div><span id="st-used">–</span><small data-i18n>Alerts this shift</small></div></div>
+      <div class="rp-stat"><span class="rp-ic"><i data-icon="reports"></i></span><div><span id="st-digest">–</span><small data-i18n>In the digest</small></div></div>
+      <div class="rp-stat warn"><span class="rp-ic"><i data-icon="clock"></i></span><div><span id="st-day">–</span><small data-i18n>Day type</small></div></div>
+      <div class="rp-stat ok"><span class="rp-ic"><i data-icon="shield"></i></span><div><span id="st-ledger">–</span><small id="st-ledger-sub">Sealed ledger entries</small></div></div>
+    </div>
+
+    <div id="surge" class="dc-surge" hidden>
+      <i data-icon="alert"></i><div><b data-i18n>Surge mode</b><span id="surge-reason"></span></div>
+    </div>
+
+    <div id="drift" class="dc-surge" hidden>
+      <i data-icon="alert"></i><div><span id="drift-text"></span></div>
+      <button id="rebaseline" class="btn" type="button" data-i18n>Re-baseline now</button>
+    </div>
+
+    <p id="hq" class="dc-note" hidden></p>
+
+    <div class="dc-grid">
+      <section>
+        <h2 class="dc-h" data-i18n>Alerts, most recent first</h2>
+        <div id="alerts" class="dc-alerts"></div>
+        <p id="empty" class="empty" hidden data-i18n>No alerts yet. In learning mode the system alerts only on virtual-fence crossings.</p>
+      </section>
+      <aside class="dc-side">
+        <div class="dc-card">
+          <h2 class="dc-h" data-i18n>Surge mode</h2>
+          <div class="seg" role="group" aria-label="Surge mode">
+            <button type="button" class="seg-btn" data-surge="auto" data-i18n>Automatic</button>
+            <button type="button" class="seg-btn" data-surge="on" data-i18n>Force on</button>
+            <button type="button" class="seg-btn" data-surge="off" data-i18n>Force off</button>
+          </div>
+          <p class="dc-note" data-i18n>Automatic: the budget lifts when far more unusual movements than usual arrive within an hour.</p>
+        </div>
+        <form id="watch" class="dc-card">
+          <h2 class="dc-h" data-i18n>Watch Order</h2>
+          <label><span data-i18n>Camera</span><select id="w-camera" class="select"></select></label>
+          <label><span data-i18n>For (minutes)</span><input id="w-minutes" type="number" min="5" max="1440" value="120"></label>
+          <label><span data-i18n>Reason</span><input id="w-reason" type="text" maxlength="120" data-i18n-placeholder placeholder="e.g. tip-off: crossing near the nala"></label>
+          <button class="btn primary" type="submit" data-i18n>Raise sensitivity</button>
+          <ul id="orders" class="dc-orders"></ul>
+        </form>
+        <div id="verify-out" class="dc-card" hidden></div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="/static/nav.js?v=3"></script>
+  <script src="/static/i18n.js?v=1"></script>
+  <script src="/static/decision.js?v=3"></script>
+</body>
+</html>

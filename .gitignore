@@ -5,3 +5,8 @@ models/
 *.pt
 certs/
 data/
+.claude/
+.pytest_cache/
+*.pem
+hq_data/
+Claude outputs/

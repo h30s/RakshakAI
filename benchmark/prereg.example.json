@@ -1,0 +1,10 @@
+{
+  "_help": "Copy to benchmark/prereg.json, fill in, and COMMIT it (git tag prereg-v1) BEFORE the first run on the evaluation days. Changing it afterwards means a new pre-registration (prereg-v2) and both results are reported. See benchmark/PREREG.md.",
+  "train_days": 7,
+  "per_shift": 12,
+  "crawl_low": 0.5,
+  "group_min": 3,
+  "run_speed": 1.6,
+  "review_line_sample": 60,
+  "seed": 7
+}

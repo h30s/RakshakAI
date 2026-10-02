@@ -50,6 +50,7 @@ const NAV_ITEMS = [
   { id: "tab-sources", href: "/app#sources", icon: "sources", label: "Sources", count: "sources-count" },
   { id: "tab-modes", href: "/modes", icon: "modes", label: "Detection Modes", page: "modes" },
   { id: "tab-reports", href: "/reports", icon: "reports", label: "Reports", page: "reports" },
+  { id: "tab-decision", href: "/decision", icon: "shield", label: "Ranked Alerts", page: "decision" },
 ];
 
 (function renderNav() {

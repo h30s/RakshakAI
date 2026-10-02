@@ -1,0 +1,82 @@
+{
+  "_help": "Copy to data/post.json and edit for your post. Coordinates are fractions of the frame (0..1): fences are lines x1,y1,x2,y2 along the ground; restricted zones are rectangles x1,y1,x2,y2. Camera ids are the ones in app/config.py (CAMERAS / LIVE_SOURCES). learning_days: days before this post's own baseline is used (until then: borrow_baseline, a movements CSV from a post with similar traffic, relative to data/; or fence rules within the budget). baseline_days: refit window. retention: clip_days for alert clips that were not escalated, log_days for movement logs. hq_url: Sector HQ service (hq/server.py) for store-and-forward; empty = off.",
+  "post_id": "BOP07",
+  "alerts_per_shift": 12,
+  "learning_days": 14,
+  "baseline_days": 28,
+  "borrow_baseline": "",
+  "retention": {
+    "clip_days": 30,
+    "log_days": 180
+  },
+  "hq_url": "",
+  "fences": {
+    "pk-1": [
+      [
+        0.05,
+        0.62,
+        0.95,
+        0.62
+      ]
+    ],
+    "en-1": [
+      [
+        0.1,
+        0.7,
+        0.9,
+        0.7
+      ]
+    ],
+    "live-mobile": [
+      [
+        0.05,
+        0.6,
+        0.95,
+        0.6
+      ]
+    ]
+  },
+  "restricted_zones": {
+    "pk-1": [
+      [
+        0.0,
+        0.62,
+        1.0,
+        1.0
+      ]
+    ],
+    "en-1": [
+      [
+        0.0,
+        0.7,
+        1.0,
+        1.0
+      ]
+    ],
+    "live-mobile": [
+      [
+        0.0,
+        0.6,
+        1.0,
+        1.0
+      ]
+    ]
+  },
+  "calendar": {
+    "haat_weekdays": [
+      "tue"
+    ],
+    "haat_dates": [],
+    "festivals": [
+      "2026-10-20",
+      "2026-11-08"
+    ],
+    "seals": [
+      {
+        "from": "2026-11-08T18:00",
+        "to": "2026-11-11T18:00"
+      }
+    ]
+  },
+  "watchlist": []
+}

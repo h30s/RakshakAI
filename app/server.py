@@ -10,6 +10,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import config
+from .decision import api as decision_api
+from .decision.engine import DecisionEngine
 from .modes import api as modes_api
 from .modes.feeds import ModeCamera
 from .pipeline import Camera, DetectionLoop
@@ -51,6 +53,18 @@ async def lifespan(app: FastAPI):
         cameras.append(sources_api.sources[cam_id])
     tracker = JourneyTracker({c.id: c.name for c in cameras})
     tracking_api.tracker = tracker
+
+    def snapshot(cam_id):
+        """JPEG of a camera's newest frame, sealed in the ledger as alert evidence."""
+        cam = next((c for c in cameras if c.id == cam_id), None)
+        if cam is None or cam.latest is None:
+            return None
+        ok, buf = cv2.imencode(".jpg", cam.latest[1], [cv2.IMWRITE_JPEG_QUALITY, 90])
+        return buf.tobytes() if ok else None
+
+    # Decision layer: per-post baseline, alert budget, surge mode, signed ledger (app/decision).
+    decision = DecisionEngine(config.DATA_DIR, {c.id: c.name for c in cameras}, snapshot)
+    decision_api.engine = decision
     # Detection-modes clips: same detection loop, but they only play while watched on /modes
     # and are not dashboard cameras (not in /ws, /api/cameras or journey tracking).
     for i, (clip_id, name, file) in enumerate(mode_clips, start=len(cameras)):
@@ -60,12 +74,17 @@ async def lifespan(app: FastAPI):
         group = [item for item in group if item[0] not in modes_api.clips]
         if group:
             tracker.update(t, group)
+            try:
+                decision.observe(t, group)
+            except Exception:
+                log.exception("Decision layer could not read this pass")
 
     feeds = cameras + list(modes_api.clips.values())
     loop = DetectionLoop(feeds, on_results=track)  # loads the models before any feed starts
     for cam in feeds:
         cam.start()
     loop.start()
+    decision.start()
     # Threat monitoring (Overview tab): camera health and weapon incidents on dashboard cameras.
     threats_api.monitor = ThreatMonitor(cameras, loop, IncidentStore())
     threats_api.monitor.start()
@@ -90,7 +109,7 @@ async def revalidate_static(request, call_next):
     """Make browsers re-check the page, scripts and styles on every load (cheap 304s), so an
     updated dashboard is picked up without a hard refresh."""
     response = await call_next(request)
-    if request.url.path in ("/", "/app", "/modes", "/reports", "/feedback") or request.url.path.startswith("/static/"):
+    if request.url.path in ("/", "/app", "/modes", "/reports", "/feedback", "/decision") or request.url.path.startswith("/static/"):
         response.headers["Cache-Control"] = "no-cache"
     return response
 app.include_router(tracking_api.router)
@@ -98,6 +117,7 @@ app.include_router(modes_api.router)
 app.include_router(sources_api.router)
 app.include_router(threats_api.router)
 app.include_router(website_api.router)
+app.include_router(decision_api.router)
 
 
 @app.get("/modes")
