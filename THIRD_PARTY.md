@@ -62,4 +62,4 @@ The running system no longer needs the `ultralytics` package; it is used only on
 | onnxslim | MIT (verify) |
 | nncf (optional, INT8 quantization) | Apache-2.0 |
 
-**Development (`requirements-dev.txt`)**: pytest (MIT), bandit (Apache-2.0), pip-audit (Apache-2.0).
+**Development (`requirements-dev.txt`)**: pytest (MIT), httpx2 and httpx (BSD-3-Clause, FastAPI test client), bandit (Apache-2.0), pip-audit (Apache-2.0).
