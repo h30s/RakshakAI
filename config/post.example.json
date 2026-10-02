@@ -1,5 +1,5 @@
 {
-  "_help": "Copy to data/post.json and edit for your post. Coordinates are fractions of the frame (0..1): fences are lines x1,y1,x2,y2 along the ground; restricted zones are rectangles x1,y1,x2,y2. Camera ids are the ones in app/config.py (CAMERAS / LIVE_SOURCES). learning_days: days before this post's own baseline is used (until then: borrow_baseline, a movements CSV from a post with similar traffic, relative to data/; or fence rules within the budget). baseline_days: refit window. retention: clip_days for alert clips that were not escalated, log_days for movement logs. hq_url: Sector HQ service (hq/server.py) for store-and-forward; empty = off.",
+  "_help": "Copy to data/post.json and edit for your post. Coordinates are fractions of the frame (0..1): fences are lines x1,y1,x2,y2 along the ground; restricted zones are rectangles x1,y1,x2,y2. Camera ids are the ones in app/config.py (CAMERAS / LIVE_SOURCES). learning_days: days before this post's own baseline is used (until then: borrow_baseline, a movements CSV from a post with similar traffic, relative to data/; or fence rules within the budget). baseline_days: refit window. retention: clip_days for alert clips that were not escalated, log_days for movement logs. hq_url: Sector HQ service (hq/server.py) for store-and-forward; empty = off. integration_token: if set, FRS / ANPR systems must send it as X-Rakshak-Token. comms: GSM modem port (e.g. /dev/ttyUSB2 or COM5), duty phone numbers (keep real numbers out of git), siren relay; see app/decision/comms.py. mqtt: broker for the C2 feed; empty host = off.",
   "post_id": "BOP07",
   "alerts_per_shift": 12,
   "learning_days": 14,
@@ -78,5 +78,19 @@
       }
     ]
   },
-  "watchlist": []
+  "watchlist": [],
+  "integration_token": "",
+  "comms": {
+    "modem": "",
+    "baud": 115200,
+    "duty_phones": [],
+    "call_for": "critical",
+    "voice_clip": "",
+    "siren": null
+  },
+  "mqtt": {
+    "host": "",
+    "port": 1883,
+    "prefix": "rakshak"
+  }
 }

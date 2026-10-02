@@ -34,9 +34,19 @@ FEED_FPS = float(os.getenv("FEED_FPS", 12))
 # JPEG quality of the frames streamed to the browser.
 JPEG_QUALITY = 80
 
-# General-purpose COCO model (person, car, bag, knife, ... 80 classes).
-GENERAL_MODEL = os.getenv("GENERAL_MODEL", "yolov8n.pt")  # file in MODEL_DIR
-GENERAL_IMGSZ = int(os.getenv("GENERAL_IMGSZ", 416))
+# General-purpose COCO model (person, car, bag, knife, ... 80 classes): YOLOX (Apache-2.0),
+# official ONNX release; yolox_nano.onnx / yolox_tiny.onnx (416 px) or yolox_s.onnx (640 px).
+GENERAL_MODEL = os.getenv("GENERAL_MODEL", "yolox_tiny.onnx")  # file in MODEL_DIR
+GENERAL_IMGSZ = int(os.getenv("GENERAL_IMGSZ", 416))  # informational: YOLOX ONNX files have a fixed input size
+# "onnxruntime" (default) or "openvino" (Intel CPUs such as the N100; uses an INT8 IR if present).
+DETECTOR_BACKEND = os.getenv("DETECTOR_BACKEND", "onnxruntime")
+OPENVINO_INT8_WEAPON = os.getenv("OPENVINO_INT8_WEAPON", "0") == "1"  # see app/detector.py YoloV8
+# Motion gating: a camera with nothing moving and nobody in view is analysed once every
+# IDLE_INTERVAL_S; one with motion (mean change of a 64x36 grey thumbnail >= MOTION_THRESHOLD
+# grey levels) or people / vehicles in view is analysed on every pass. MOTION_GATING=0 turns it off.
+MOTION_GATING = os.getenv("MOTION_GATING", "1") == "1"
+IDLE_INTERVAL_S = float(os.getenv("IDLE_INTERVAL_S", 1.0))
+MOTION_THRESHOLD = float(os.getenv("MOTION_THRESHOLD", 3.0))
 GENERAL_CONF = float(os.getenv("GENERAL_CONF", 0.40))
 
 # Weapon model (Gun, Explosion, Grenade, Knife) — Subh775/Threat-Detection-YOLOv8n, MIT.
@@ -162,7 +172,7 @@ CERT_DIR = ROOT / "certs"
 # --- Threat monitoring (Overview tab, /reports) ---------------------------------------------
 # A confirmed weapon on a dashboard camera becomes an incident that the operator can mark
 # "Working on it" or "Resolved". Incidents are kept in DATA_DIR (history for the Reports page).
-DATA_DIR = ROOT / "data"
+DATA_DIR = Path(os.getenv("RAKSHAK_DATA_DIR", ROOT / "data"))  # override to keep a test run's data apart
 # Threat score of an incident: SEVERITY x (0.75 + 0.25 x detection confidence), 0-100.
 THREAT_SEVERITY = {"explosion": 100, "grenade": 95, "gun": 90, "knife": 80}
 THREAT_LEVELS = [(70, "High"), (40, "Medium"), (0, "Low")]  # score >= threshold -> level

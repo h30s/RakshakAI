@@ -1,0 +1,306 @@
+Run started:2026-10-02 09:31:06.957622+00:00
+
+Test results:
+>> Issue: [B310:blacklist] Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+   Severity: Medium   Confidence: High
+   CWE: CWE-22 (https://cwe.mitre.org/data/definitions/22.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen
+   Location: app\decision\sync.py:25:13
+24	                                     headers={"Content-Type": "application/json"})
+25	        with urllib.request.urlopen(req, timeout=timeout) as res:
+26	            return json.loads(res.read())
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: app\detector.py:87:8
+86	            self.meta = {"names": names}
+87	        except Exception:
+88	            pass
+89	        if source == int8:
+
+--------------------------------------------------
+>> Issue: [B104:hardcoded_bind_all_interfaces] Possible binding to all interfaces.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-605 (https://cwe.mitre.org/data/definitions/605.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b104_hardcoded_bind_all_interfaces.html
+   Location: app\sources\api.py:137:24
+136	    server = uvicorn.Server(uvicorn.Config(
+137	        phone_app, host="0.0.0.0", port=config.PHONE_PORT, ssl_certfile=str(cert), ssl_keyfile=str(key),
+138	        lifespan="off", log_level="warning"))
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: app\sources\network.py:9:0
+8	import socket
+9	import subprocess
+10	from pathlib import Path
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: app\sources\network.py:103:15
+102	    def run(*args):
+103	        return subprocess.run([adb, *args], capture_output=True, text=True, timeout=15)
+104	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: app\tracking\osnet.py:294:8
+293	        num_blocks = len(blocks)
+294	        assert num_blocks == len(layers)
+295	        assert num_blocks == len(channels) - 1
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: app\tracking\osnet.py:295:8
+294	        assert num_blocks == len(layers)
+295	        assert num_blocks == len(channels) - 1
+296	        self.loss = loss
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: app\tracking\reid.py:46:4
+45	    missing, _ = model.load_state_dict(state, strict=False)
+46	    assert all("classifier" in k for k in missing), f"unexpected OSNet weights: {missing}"
+47	    model.eval()
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: benchmark\run.py:36:0
+35	import random
+36	import subprocess
+37	import sys
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: benchmark\run.py:66:15
+65	    try:
+66	        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT.parent, capture_output=True, text=True).stdout.strip()
+67	        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT.parent, capture_output=True, text=True).stdout
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: benchmark\run.py:66:15
+65	    try:
+66	        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT.parent, capture_output=True, text=True).stdout.strip()
+67	        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT.parent, capture_output=True, text=True).stdout
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: benchmark\run.py:67:16
+66	        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT.parent, capture_output=True, text=True).stdout.strip()
+67	        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT.parent, capture_output=True, text=True).stdout
+68	        return {"commit": head or None, "uncommitted_changes": bool(dirty.strip())}
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: benchmark\run.py:67:16
+66	        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT.parent, capture_output=True, text=True).stdout.strip()
+67	        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT.parent, capture_output=True, text=True).stdout
+68	        return {"commit": head or None, "uncommitted_changes": bool(dirty.strip())}
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random
+   Location: benchmark\run.py:193:10
+192	    and compare how many are alerted with surge mode on and off."""
+193	    rng = random.Random(seed)
+194	    days = sorted({shift_of(m.t_start)[0] for m in movements})
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random
+   Location: benchmark\run.py:225:39
+224	                clip = tmp / f"clip{i}.bin"
+225	                clip.write_bytes(bytes(random.Random(i).randbytes(2048)))
+226	                led.append("alert", {"n": i}, clip=clip, t=1_700_000_000 + i)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: benchmark\run.py:227:12
+226	                led.append("alert", {"n": i}, clip=clip, t=1_700_000_000 + i)
+227	            assert not led.verify(), "fresh ledger must verify"
+228	            return led, key
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random
+   Location: benchmark\run.py:252:14
+251	        big = Ledger(tmp / "ledger.jsonl", Ed25519PrivateKey.generate(), clip_dir=tmp)
+252	        rng = random.Random(1)
+253	        every = max(1, entries // clips)
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random
+   Location: benchmark\run.py:277:10
+276	    hint of which system raised them. Reviewers get sheet.csv only; key.csv stays with the team."""
+277	    rng = random.Random(seed)
+278	    full = [r for r in results if r["full"]]
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random
+   Location: benchmark\run.py:383:10
+382	    """Plausible-looking fake logs, ONLY to check that the benchmark runs end to end."""
+383	    rng = random.Random(seed)
+384	    start = dt.datetime(2026, 8, 3)
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random
+   Location: benchmark\run.py:419:10
+418	    and high scores are actionable."""
+419	    rng = random.Random(seed)
+420	    with open(key_path, newline="", encoding="utf-8") as f:
+
+--------------------------------------------------
+>> Issue: [B311:blacklist] Standard pseudo-random generators are not suitable for security/cryptographic purposes.
+   Severity: Low   Confidence: High
+   CWE: CWE-330 (https://cwe.mitre.org/data/definitions/330.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random
+   Location: scripts\decision_preview.py:37:10
+36	    """16 days of ordinary traffic so the engine starts in ranked mode, then a few odd movements."""
+37	    rng = random.Random(4)
+38	    today = dt.datetime.combine(dt.date.today(), dt.time())
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: scripts\egress_summary.py:16:0
+15	import re
+16	import subprocess
+17	from collections import Counter, defaultdict
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: scripts\egress_summary.py:51:14
+50	    try:
+51	        out = subprocess.run(["nft", "list", "counter", "inet", "rakshak_egress", "cam_blocked"],
+52	                             capture_output=True, text=True, timeout=5).stdout
+53	        return out.strip() or None
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: scripts\egress_summary.py:51:14
+50	    try:
+51	        out = subprocess.run(["nft", "list", "counter", "inet", "rakshak_egress", "cam_blocked"],
+52	                             capture_output=True, text=True, timeout=5).stdout
+53	        return out.strip() or None
+
+--------------------------------------------------
+>> Issue: [B310:blacklist] Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+   Severity: Medium   Confidence: High
+   CWE: CWE-22 (https://cwe.mitre.org/data/definitions/22.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen
+   Location: scripts\fetch_assets.py:100:9
+99	    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+100	    with urllib.request.urlopen(req) as r, open(dest, "wb") as f:
+101	        shutil.copyfileobj(r, f)
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: scripts\measure_perf.py:18:0
+17	import re
+18	import subprocess
+19	import sys
+
+--------------------------------------------------
+>> Issue: [B607:start_process_with_partial_path] Starting a process with a partial executable path
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html
+   Location: scripts\measure_perf.py:30:18
+29	        if platform.system() == "Windows":
+30	            out = subprocess.run(["powershell", "-NoProfile", "-Command", "(Get-CimInstance Win32_Processor).Name"],
+31	                                 capture_output=True, text=True, timeout=10).stdout.strip()
+32	            return out or platform.processor()
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: scripts\measure_perf.py:30:18
+29	        if platform.system() == "Windows":
+30	            out = subprocess.run(["powershell", "-NoProfile", "-Command", "(Get-CimInstance Win32_Processor).Name"],
+31	                                 capture_output=True, text=True, timeout=10).stdout.strip()
+32	            return out or platform.processor()
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 5402
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 25
+		Medium: 3
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 1
+		High: 27
+Files skipped (0):

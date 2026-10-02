@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Border Pulse · Rakshak AI</title>
+  <meta name="theme-color" content="#07090e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css?v=9">
+  <link rel="stylesheet" href="/static/reports.css?v=4">
+  <link rel="stylesheet" href="/static/decision.css?v=3">
+  <style>
+    .pl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+    .pl-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .pl-card h2 { font-size: 16px; margin: 0; }
+    .pl-map { width: 100%; height: auto; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; }
+    .pl-map line.cell { stroke: var(--border); stroke-width: 1; }
+    .pl-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+    .pl-facts b { display: block; font-size: 18px; color: var(--text); font-variant-numeric: tabular-nums; }
+    .pl-flags { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; font-size: 12.5px; }
+    .pl-flags li { padding: 7px 10px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); }
+    .pl-flags li.new { background: rgba(255, 92, 99, .12); color: #ff8a8f; }
+    .pl-legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+    .pl-legend i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <header id="app-nav" data-page="pulse"></header>
+
+  <main class="reports decision">
+    <div class="page-head">
+      <div>
+        <div class="eyebrow"><i data-icon="route"></i><span data-i18n>New intelligence</span></div>
+        <h1 data-i18n>Border Pulse</h1>
+        <p data-i18n>What changed at this post in the last 7 days, compared with the 4 weeks before: new paths, paths used far more than usual, a shifted peak hour, night activity and repeat crossers.</p>
+      </div>
+      <div class="dc-head-actions"><button class="btn" type="button" data-lang-toggle>हिन्दी</button></div>
+    </div>
+    <div class="pl-legend">
+      <span><i style="background: var(--muted)"></i><span data-i18n>usual path (thicker = more used)</span></span>
+      <span><i style="background: #ff5c63"></i><span data-i18n>new this week</span></span>
+      <span><i style="background: var(--warn)"></i><span data-i18n>far more than usual</span></span>
+    </div>
+    <p id="pl-week" class="dc-note"></p>
+    <div id="pl-cards" class="pl-grid"></div>
+    <p id="pl-empty" class="empty" hidden data-i18n>No movements logged yet. Border Pulse needs at least a week of history.</p>
+    <p class="dc-note" data-i18n>Repeat crossers are pseudonymous tracker IDs that reset when the system restarts: leads for review, never an identification.</p>
+  </main>
+
+  <script src="/static/nav.js?v=4"></script>
+  <script src="/static/i18n.js?v=2"></script>
+  <script src="/static/pulse.js?v=1"></script>
+</body>
+</html>

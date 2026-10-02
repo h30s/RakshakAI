@@ -13,6 +13,12 @@ resolution or on how far away the person is:
 * low           - fraction of the time the box was wider than tall (crawling / lying)
 * crossed       - whether the path crossed a virtual fence line configured for this camera
 * restricted    - whether the path entered a restricted zone configured for this camera
+* zone_dwell    - seconds spent inside a restricted zone (loitering)
+
+Decisions are not left until the person has gone: partials() hands the engine a summary of every
+track still in view (on a new fence crossing at once, otherwise every couple of seconds), so a
+crossing or a loiterer can alert while it is happening. The engine decides each track once; the
+decision travels with the finished Movement (m.decided) so it is logged, not decided again.
 """
 import math
 import statistics
@@ -35,6 +41,7 @@ class Movement:
     low: float = 0.0
     crossed: bool = False
     restricted: bool = False
+    zone_dwell: float = 0.0
     person: str = ""
     # Filled in by the benchmark from ground truth; never used for scoring.
     staged: bool = False
@@ -81,14 +88,15 @@ def summarise(camera, samples, fences=(), restricted=(), person=""):
             speeds.append(math.dist(f0, f1) / ((h0 + h1) / 2) / dt)
     low = sum(1 for _, b, _ in samples if (b[2] - b[0]) > (b[3] - b[1])) / len(samples)
     crossed = any(_segments_cross(a, b, (f[0], f[1]), (f[2], f[3])) for a, b in zip(feet, feet[1:]) for f in fences)
-    entered = any(_inside(p, r) for p in feet for r in restricted)
+    inside = [any(_inside(p, r) for r in restricted) for p in feet]
+    zone_dwell = sum(t1 - t0 for (t0, _, _), (t1, _, _), a, b in zip(samples, samples[1:], inside, inside[1:]) if a and b)
     return Movement(
         camera=camera, t_start=samples[0][0], t_end=samples[-1][0],
         entry=cell(*feet[0]), exit=cell(*feet[-1]),
         speed=round(statistics.median(speeds), 3) if speeds else 0.0,
         dwell=round(samples[-1][0] - samples[0][0], 2),
         group=1 + round(statistics.median(n for *_, n in samples)),
-        low=round(low, 2), crossed=crossed, restricted=entered, person=person,
+        low=round(low, 2), crossed=crossed, restricted=any(inside), zone_dwell=round(zone_dwell, 2), person=person,
     )
 
 
@@ -96,6 +104,10 @@ def summarise(camera, samples, fences=(), restricted=(), person=""):
 class _Open:
     samples: list = field(default_factory=list)
     last: float = 0.0
+    checked: float = 0.0       # time of the newest sample when the track was last evaluated live
+    checked_at: float = 0.0    # wall time of that evaluation
+    crossed: bool = False      # a fence crossing was already seen in a live evaluation
+    decided: tuple = None      # (decision, reason, alert id) once the engine decided this track
 
 
 class TrackAccumulator:
@@ -132,8 +144,30 @@ class TrackAccumulator:
             tr = self.open.pop(key)
             if len(tr.samples) >= self.min_samples:
                 cam, pid = key
-                self.finished.append(summarise(cam, tr.samples, self.fences.get(cam, ()),
-                                               self.restricted.get(cam, ()), person=pid))
+                m = summarise(cam, tr.samples, self.fences.get(cam, ()), self.restricted.get(cam, ()), person=pid)
+                m.decided = tr.decided
+                self.finished.append(m)
+
+    def partials(self, now, every_s=2.0):
+        """[(key, Movement so far)] for tracks still in view and not yet decided: immediately after
+        a new fence crossing, otherwise at most every `every_s` seconds when new boxes arrived."""
+        out = []
+        with self.lock:
+            for key, tr in self.open.items():
+                if tr.decided or len(tr.samples) < self.min_samples or tr.last <= tr.checked:
+                    continue
+                cam, pid = key
+                m = summarise(cam, tr.samples, self.fences.get(cam, ()), self.restricted.get(cam, ()), person=pid)
+                if (m.crossed and not tr.crossed) or now - tr.checked_at >= every_s:
+                    tr.checked, tr.checked_at, tr.crossed = tr.last, now, m.crossed
+                    out.append((key, m))
+        return out
+
+    def mark(self, key, decided):
+        """Record the engine's decision for an open track, so it is not decided twice."""
+        with self.lock:
+            if key in self.open:
+                self.open[key].decided = decided
 
     def flush(self, now):
         with self.lock:

@@ -1,8 +1,10 @@
 "use strict";
 
-// Ranked Alerts page: polls /api/decision/overview and renders the alert budget, surge mode,
-// Watch Orders, drift watch, the Sector HQ link and each alert with the score terms that made it
-// fire. Text goes through t() (static/i18n.js) for the Hindi / English toggle.
+// Ranked Alerts page: the overview is pushed over /ws/decision the moment it changes (polling
+// every 10 s only while the socket is down), and renders the alert budget, surge mode, Watch
+// Orders, drift watch, the Sector HQ link, the shift digest, alert latency and each alert with
+// the score terms that made it fire. When a new alert is first drawn, the page reports it
+// (console latency). Text goes through t() (static/i18n.js) for the Hindi / English toggle.
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -11,6 +13,8 @@ const DAY = { normal: "Normal", haat: "Haat day", festival: "Festival", seal: "B
 const STATUS = { new: "New", acknowledged: "Acknowledged", escalated: "Escalated", dismissed: "Dismissed" };
 const MODE = { ranked: "Ranked", learning: "Learning", borrowed: "Borrowed" };
 let last = null, renderedAlerts = "";
+const shown = new Set();  // alerts this page has already drawn
+let loaded = false;
 
 async function api(path, body) {
   const res = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : undefined);
@@ -69,13 +73,37 @@ function render(o) {
   if (key !== renderedAlerts) {
     renderedAlerts = key;
     $("alerts").innerHTML = o.alerts.map(alertCard).join("");
+    // Only alerts that arrive while this page is open count as delivered; the ones already
+    // there when it loaded would add page-load time, not alert latency. requestAnimationFrame
+    // waits until the page is actually on screen, so a hidden console reports when shown.
+    const fresh = o.alerts.filter((a) => !shown.has(a.id));
+    fresh.forEach((a) => shown.add(a.id));
+    if (loaded) requestAnimationFrame(() => fresh.filter((a) => !("console" in (a.latency || {}))).forEach((a) => {
+      api(`/api/decision/alerts/${encodeURIComponent(a.id)}/delivered`, { channel: "console" }).catch(() => {});
+    }));
+    loaded = true;
   }
+  $("digest").innerHTML = (o.digest || []).map((d) => `<li><span>${hhmm(d.t)}</span><span>${esc(d.camera_name)} · ${esc(d.path)}${d.crossed ? ' · <span class="dc-x">fence</span>' : ""} · ${esc(t(d.reason))}</span><b>${d.score.toFixed(1)}</b></li>`).join("");
+  $("digest-empty").hidden = (o.digest || []).length > 0;
+  const lat = o.latency || {};
+  $("latency").innerHTML = [["server", "Sealed"], ["console", "On console"], ["sms", "SMS sent"], ["ack", "Acknowledged"]].map(([k, label]) => {
+    const v = lat[k] || {};
+    return `<li>${esc(t(label))}: ${v.n ? `p50 ${v.p50} s · p95 ${v.p95} s · ${v.n} ${esc(t("alerts"))}` : "—"}</li>`;
+  }).join("");
   $("empty").hidden = o.alerts.length > 0;
   $("orders").innerHTML = o.watch_orders.map((w) => `<li>${esc(w.camera)} ${esc(t("until {t}", { t: hhmm(w.until) }))}${w.reason ? ` · ${esc(w.reason)}` : ""}</li>`).join("");
 }
 
 async function poll() {
   try { render(await api("/api/decision/overview")); } catch { /* retry on next tick */ }
+}
+
+let socketUp = false;
+function connect() {
+  const ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws/decision`);
+  ws.onopen = () => { socketUp = true; };
+  ws.onmessage = (e) => render(JSON.parse(e.data));
+  ws.onclose = () => { socketUp = false; setTimeout(connect, 2000); };
 }
 
 document.addEventListener("click", async (e) => {
@@ -112,5 +140,6 @@ $("verify").addEventListener("click", async () => {
     $("w-camera").innerHTML = cams.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
   } catch { /* cameras list unavailable */ }
   poll();
-  setInterval(poll, 3000);
+  connect();
+  setInterval(() => { if (!socketUp) poll(); }, 10000);
 })();

@@ -6,7 +6,7 @@ Score (higher = more unusual), every term shown to the operator:
         -log P(hour  | camera, day type)            "unusual hour" (activity level)
         -log P(speed | camera, day type)            "unusual speed"
         -log P(dwell | camera, day type)            "unusual dwell"
-        + behavioural terms: crawl/low posture, group size
+        + behavioural terms: crawl/low posture, group size, loitering in a restricted zone
 
 Counts are sparse (camera x hour x day type is hundreds of cells and a festival may have been seen
 once), so each probability is smoothed towards its parent level (hierarchical back-off):
@@ -29,6 +29,7 @@ SPEED_BINS = [0.05, 0.15, 0.3, 0.6, 1.0, 1.6, 2.5]    # body-heights per second
 DWELL_BINS = [2, 5, 10, 20, 40, 80, 160, 320]          # seconds
 N_PATHS = 12 * 12                                      # grid cells squared: prior for unseen paths
 CRAWL_WEIGHT, GROUP_WEIGHT = 2.0, 0.5
+LOITER_S, LOITER_WEIGHT, LOITER_MAX = 30.0, 2.0, 8.0   # loiter term starts after 30 s in a restricted zone
 
 
 def _bin(value, edges):
@@ -94,6 +95,8 @@ class Baseline:
                                                _bin(m.dwell, DWELL_BINS), 1 / (len(DWELL_BINS) + 1))),
             "low posture / crawl": CRAWL_WEIGHT * m.low,
             "group": GROUP_WEIGHT * max(0, m.group - 2),
+            "loiter in restricted zone": (min(LOITER_MAX, LOITER_WEIGHT * m.zone_dwell / LOITER_S)
+                                          if m.zone_dwell >= LOITER_S else 0.0),
         }
         terms = {k: round(v, 3) for k, v in terms.items()}
         return round(sum(terms.values()), 3), terms

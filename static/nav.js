@@ -51,6 +51,7 @@ const NAV_ITEMS = [
   { id: "tab-modes", href: "/modes", icon: "modes", label: "Detection Modes", page: "modes" },
   { id: "tab-reports", href: "/reports", icon: "reports", label: "Reports", page: "reports" },
   { id: "tab-decision", href: "/decision", icon: "shield", label: "Ranked Alerts", page: "decision" },
+  { id: "tab-pulse", href: "/pulse", icon: "route", label: "Border Pulse", page: "pulse" },
 ];
 
 (function renderNav() {
@@ -63,18 +64,18 @@ const NAV_ITEMS = [
     <div class="nav-inner">
       <a class="nav-brand" href="/" aria-label="Rakshak AI home page">
         <span class="nav-logo">${icon("logo")}</span>
-        <span class="nav-title">Rakshak AI<small>Operations console</small></span>
+        <span class="nav-title">Rakshak AI<small data-i18n>Operations console</small></span>
       </a>
       <nav class="nav-links" id="nav-links" aria-label="Main">
         ${NAV_ITEMS.map((n) => `<a id="${n.id}" class="nav-link${n.page === page ? " active" : ""}" href="${n.href}"
-            ${n.page === page ? 'aria-current="page"' : ""}>${icon(n.icon)}<span>${n.label}</span>${n.count ? `<span id="${n.count}" class="nav-count"></span>` : ""}</a>`).join("")}
+            ${n.page === page ? 'aria-current="page"' : ""}>${icon(n.icon)}<span data-i18n>${n.label}</span>${n.count ? `<span id="${n.count}" class="nav-count"></span>` : ""}</a>`).join("")}
       </nav>
       <div class="nav-right">
         <span id="sys-status" class="sys-status" title="System status"><span class="sys-dot"></span><span class="sys-text">Checking…</span></span>
         <span id="conn" class="conn" title="Video stream"></span>
         <span id="clock" class="clock"></span>
         ${page === "dashboard" ? '<button id="sound-btn" class="icon-btn" type="button" title="Alarm sound"></button>' : ""}
-        <a class="btn nav-feedback" href="/#feedback" title="Tell us what you think of the prototype">${icon("message")}<span>Feedback</span></a>
+        <a class="btn nav-feedback" href="/#feedback" title="Tell us what you think of the prototype">${icon("message")}<span data-i18n>Feedback</span></a>
         <a id="bell" class="icon-btn bell" href="/app#overview" title="Open threats">${icon("bell")}<span id="bell-count" class="bell-count" hidden></span></a>
         <span class="avatar" title="Operator (this dashboard has no user accounts)">${icon("user")}</span>
         <button class="icon-btn nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">${icon("menu", "i-open")}${icon("close", "i-close")}</button>

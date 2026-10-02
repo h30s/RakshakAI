@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shift Report · Rakshak AI</title>
+  <style>
+    :root { color-scheme: light; --ink: #14161b; --muted: #5b6270; --line: #d5d9e0; }
+    body { font: 13px/1.45 system-ui, "Segoe UI", "Noto Sans Devanagari", sans-serif; color: var(--ink); background: #fff; margin: 0; padding: 24px 16px; }
+    main { max-width: 880px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 14px; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+    .meta { color: var(--muted); }
+    .bar { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+    button { font: inherit; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: #f4f6f8; cursor: pointer; }
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-weight: 600; color: var(--muted); font-size: 12px; }
+    .mono { font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; overflow-wrap: anywhere; }
+    .ok { color: #11733a; font-weight: 600; } .bad { color: #b3261e; font-weight: 600; }
+    .sign { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; margin-top: 40px; }
+    .sign div { border-top: 1px solid var(--ink); padding-top: 6px; color: var(--muted); }
+    @media print { .bar { display: none; } body { padding: 0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="bar">
+      <button type="button" data-lang-toggle>हिन्दी</button>
+      <button type="button" onclick="window.print()" data-i18n>Print</button>
+    </div>
+    <h1><span data-i18n>Shift report</span> · <span id="post"></span></h1>
+    <p class="meta" id="when"></p>
+
+    <h2 data-i18n>Summary</h2>
+    <p id="summary"></p>
+
+    <h2 data-i18n>Alerts</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th data-i18n>Time</th><th>ID</th><th data-i18n>Camera</th><th data-i18n>Reason</th><th data-i18n>Score</th><th data-i18n>Status</th><th data-i18n>Ledger</th></tr></thead>
+      <tbody id="alerts"></tbody>
+    </table></div>
+
+    <h2 data-i18n>Officer actions</h2>
+    <ul id="actions"></ul>
+
+    <h2 data-i18n>Evidence</h2>
+    <p id="ledger"></p>
+
+    <div class="sign">
+      <div data-i18n>Duty operator handing over (name, signature, time)</div>
+      <div data-i18n>Duty operator taking over (name, signature, time)</div>
+      <div data-i18n>Post commander (name, signature)</div>
+    </div>
+  </main>
+
+  <script src="/static/i18n.js?v=2"></script>
+  <script>
+    "use strict";
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const hhmm = (ts) => new Date(ts * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const DAY = { normal: "Normal", haat: "Haat day", festival: "Festival", seal: "Border sealed" };
+    const STATUS = { new: "New", acknowledged: "Acknowledged", escalated: "Escalated", dismissed: "Dismissed" };
+    let r = null;
+
+    function render() {
+      if (!r) return;
+      $("post").textContent = r.post;
+      $("when").textContent = `${t("Shift {n}", { n: r.shift.number })} · ${r.shift.from.replace("T", " ")} → ${r.shift.to.replace("T", " ")} · ${t(DAY[r.day_type] || r.day_type)}`;
+      const lat = r.latency.console || {};
+      $("summary").textContent = t("{a} alerts (budget {b} routine per shift), {d} movements kept in the digest. Mode: {m}.",
+        { a: r.alerts.length, b: r.per_shift, d: r.digest_count, m: r.mode })
+        + (lat.n ? " " + t("Console latency p95 {p} s over {n} alerts.", { p: lat.p95, n: lat.n }) : "");
+      $("alerts").innerHTML = r.alerts.map((a) => `<tr><td>${hhmm(a.t)}</td><td class="mono">${esc(a.id)}</td><td>${esc(a.camera_name)}</td>
+        <td>${esc(t(a.reason))}</td><td>${a.score.toFixed(1)}</td><td>${esc(t(STATUS[a.status] || a.status))}</td><td class="mono">#${a.ledger_seq}</td></tr>`).join("")
+        || `<tr><td colspan="7">${esc(t("No alerts in this shift."))}</td></tr>`;
+      $("actions").innerHTML = r.actions.map((e) => `<li>${hhmm(e.t)} · ${esc(e.kind)} · ${esc(JSON.stringify(e.data))}</li>`).join("")
+        || `<li>${esc(t("None."))}</li>`;
+      $("ledger").innerHTML = `${r.ledger.intact ? `<span class="ok">${esc(t("Ledger intact"))}</span>` : `<span class="bad">${esc(t("Ledger problems found"))}</span>`}
+        · ${esc(t("{n} entries", { n: r.ledger.entries }))} · <span class="mono">${esc(t("head"))} ${esc(r.ledger.head)}</span>`;
+    }
+
+    document.addEventListener("langchange", render);
+    (async () => {
+      applyI18n();
+      const at = new URLSearchParams(location.search).get("at");
+      r = await (await fetch(`/api/decision/shift-report${at ? `?at=${encodeURIComponent(at)}` : ""}`)).json();
+      render();
+    })();
+  </script>
+</body>
+</html>

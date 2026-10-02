@@ -40,6 +40,12 @@ def landing():
     return FileResponse(config.STATIC_DIR / "landing.html")
 
 
+@router.get("/demo")
+def demo():
+    """The demo video (static/site/demo.mp4, once recorded) and a walkthrough of the prototype."""
+    return FileResponse(config.STATIC_DIR / "demo.html")
+
+
 @router.get("/app")
 def operations_console():
     return FileResponse(config.STATIC_DIR / "index.html")

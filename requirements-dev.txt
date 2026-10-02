@@ -1,5 +1,6 @@
 # What the tests and the benchmark need; no models, no torch (used by CI).
 numpy>=1.26
+opencv-python-headless>=4.9
 fastapi>=0.110
 uvicorn>=0.29
 cryptography>=42

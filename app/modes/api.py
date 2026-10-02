@@ -16,8 +16,8 @@ _posters: dict[str, bytes] = {}
 @router.get("/api/modes")
 def list_modes():
     return [{**{k: m[k] for k in ("id", "name", "tagline", "about", "challenges")},
-             "clips": [{"id": clip_id, "name": name} for clip_id, name, _ in m["clips"]]}
-            for m in config.DETECTION_MODES]
+             "clips": [{"id": clip_id, "name": name} for clip_id, name, _ in m["clips"] if clip_id in clips]}
+            for m in config.DETECTION_MODES]  # clips whose video is missing were skipped at startup
 
 
 def _clip(clip_id):

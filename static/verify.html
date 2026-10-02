@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Check Alert SMS · Rakshak AI</title>
+  <meta name="theme-color" content="#07090e">
+  <style>
+    :root { color-scheme: dark; --bg: #07090e; --surface: #11151d; --border: #263042; --text: #e8ecf3; --muted: #93a0b4; --ok: #3ccf7f; --bad: #ff6b72; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px 16px 40px; font: 15px/1.5 system-ui, "Segoe UI", "Noto Sans Devanagari", sans-serif; background: var(--bg); color: var(--text); }
+    main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+    h1 { font-size: 20px; margin: 0; }
+    p { margin: 0; color: var(--muted); font-size: 14px; }
+    textarea, input { width: 100%; font: 13px ui-monospace, Consolas, monospace; color: var(--text); background: var(--surface);
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    textarea { min-height: 120px; resize: vertical; }
+    button { font: 600 15px system-ui, sans-serif; padding: 12px 16px; border-radius: 10px; border: 0; background: #3b82f6; color: #fff; cursor: pointer; }
+    button.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); font-weight: 500; font-size: 13px; padding: 8px 12px; }
+    .row { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .result { border-radius: 12px; padding: 14px 16px; font-size: 16px; font-weight: 650; }
+    .result.ok { background: rgba(60, 207, 127, .12); color: var(--ok); border: 1px solid rgba(60, 207, 127, .4); }
+    .result.bad { background: rgba(255, 107, 114, .12); color: var(--bad); border: 1px solid rgba(255, 107, 114, .4); }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 10px 0 0; font-size: 14px; font-weight: 400; color: var(--text); }
+    dt { color: var(--muted); }
+    label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="row">
+      <h1 data-i18n>Check an alert SMS</h1>
+      <button class="ghost" type="button" data-lang-toggle>हिन्दी</button>
+    </div>
+    <p data-i18n>Paste the alert SMS. This phone checks its signature against the post's key: no internet needed. A forged or changed SMS fails.</p>
+    <textarea id="sms" placeholder="RK1 BOP07 gate-1 0214 OFFPATH L1a2b3c4d …" data-i18n-placeholder></textarea>
+    <button id="check" type="button" data-i18n>Check signature</button>
+    <div id="result" hidden></div>
+    <label><span data-i18n>Post public key (set once, from the post's console or HQ)</span>
+      <input id="pub" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="64">
+    </label>
+    <p id="keynote"></p>
+  </main>
+
+  <script src="/static/i18n.js?v=2"></script>
+  <script src="/static/vendor/nacl-fast.min.js"></script>
+  <script>
+    "use strict";
+    // The SMS format is 'RK1 <post> <camera> <HHMM> <code> L<ledger head> <signature>' (see
+    // app/decision/ledger.py): the signature is Ed25519 over everything before the last space,
+    // base64url without padding. WebCrypto Ed25519 is used where the browser has it; otherwise
+    // TweetNaCl (public domain, static/vendor), so it also works on older phones.
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const KEY = "rk-post-pub";
+    const hex = (h) => Uint8Array.from(h.match(/../g).map((b) => parseInt(b, 16)));
+    const b64url = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), (c) => c.charCodeAt(0));
+    const store = { get: () => { try { return localStorage.getItem(KEY) || ""; } catch { return ""; } },
+                    set: (v) => { try { localStorage.setItem(KEY, v); } catch { /* this visit only */ } } };
+
+    async function verify(pubHex, text, sig) {
+      const msg = new TextEncoder().encode(text);
+      try {
+        const key = await crypto.subtle.importKey("raw", hex(pubHex), { name: "Ed25519" }, false, ["verify"]);
+        return await crypto.subtle.verify({ name: "Ed25519" }, key, sig, msg);
+      } catch {
+        return nacl.sign.detached.verify(msg, sig, hex(pubHex));
+      }
+    }
+
+    async function check() {
+      const sms = $("sms").value.trim().replace(/\s+/g, " ");
+      const pub = $("pub").value.trim().toLowerCase();
+      const out = $("result");
+      out.hidden = false;
+      if (!/^[0-9a-f]{64}$/.test(pub)) { out.className = "result bad"; out.textContent = t("Set the post public key first (64 characters)."); return; }
+      store.set(pub);
+      const cut = sms.lastIndexOf(" ");
+      const parts = sms.slice(0, cut).split(" ");
+      let ok = false;
+      try { ok = cut > 0 && parts[0] === "RK1" && await verify(pub, sms.slice(0, cut), b64url(sms.slice(cut + 1))); } catch { ok = false; }
+      // The SMS carries the time (HHMM) but not the date, so an old genuine SMS sent again still
+      // verifies. Show how long ago that time was and warn when it is not recent.
+      let age = null;
+      if (ok && /^\d{4}$/.test(parts[3] || "")) {
+        const now = new Date(), sent = new Date(now);
+        sent.setHours(Number(parts[3].slice(0, 2)), Number(parts[3].slice(2)), 0, 0);
+        if (sent > now) sent.setDate(sent.getDate() - 1);
+        age = Math.round((now - sent) / 60000);
+      }
+      const stale = age !== null && age > 15;
+      out.className = `result ${ok && !stale ? "ok" : "bad"}`;
+      out.innerHTML = ok
+        ? `${stale ? "⚠ " + esc(t("Genuine, but from {m} minutes ago. If you were not expecting an old alert, it may be a replay: call the post.", { m: age }))
+                   : "✓ " + esc(t("Genuine: signed by this post and not changed."))}<dl>
+            <dt>${esc(t("Post"))}</dt><dd>${esc(parts[1])}</dd><dt>${esc(t("Camera"))}</dt><dd>${esc(parts[2])}</dd>
+            <dt>${esc(t("Time"))}</dt><dd>${esc(parts[3].slice(0, 2))}:${esc(parts[3].slice(2))}</dd>
+            <dt>${esc(t("Alert"))}</dt><dd>${esc(parts[4])}</dd><dt>${esc(t("Ledger"))}</dt><dd>${esc(parts[5])}</dd></dl>`
+        : `✗ ${esc(t("NOT genuine: forged, changed, or from another post. Do not act on it; call the post."))}`;
+    }
+
+    $("check").addEventListener("click", check);
+    (async () => {
+      applyI18n();
+      const fromUrl = new URLSearchParams(location.search).get("pub");
+      let pub = (fromUrl || store.get()).toLowerCase();
+      if (!pub) {
+        try { pub = (await (await fetch("/api/decision/pubkey")).text()).trim(); } catch { /* offline: enter it by hand */ }
+      }
+      $("pub").value = pub;
+      $("keynote").textContent = pub ? t("Key fingerprint {f}… compare it with the one on the post console.", { f: pub.slice(0, 12) }) : "";
+      if ("serviceWorker" in navigator) navigator.serviceWorker.register("/verify-sw.js").catch(() => {});
+    })();
+  </script>
+</body>
+</html>

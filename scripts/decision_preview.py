@@ -1,6 +1,9 @@
-"""Run the Ranked Alerts page (/decision) without cameras or models, on made-up movements.
+"""Run the decision-layer pages without cameras or models, on made-up movements.
 
     python scripts/decision_preview.py            # then open http://localhost:8010/decision
+
+Pages: /decision (ranked alerts), /pulse (Border Pulse), /shift-report, /verify (duty-phone SMS
+check) and /demo.
 
 For working on the decision layer and its screen without the 1.4 GB of models. Everything shown
 is synthetic: never take screenshots from it for results.
@@ -16,6 +19,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -46,6 +50,11 @@ def seed(data_dir, days=16):
                             w = csv.DictWriter(f, fieldnames=list(m.row()))
                             w.writeheader()
                         w.writerow(m.row())
+            if d <= 3:  # a new night path at the nala in the last days, walked by the same tracker ID
+                for k in range(3):
+                    t = (today - dt.timedelta(days=d) + dt.timedelta(hours=1, minutes=10 * k)).timestamp()
+                    w.writerow(Movement("nala-2", t, t + 40, "r0c1", "r2c3", speed=0.2, dwell=40, low=0.5,
+                                        crossed=True, person="P-207").row())
     (data_dir / "post.json").write_text('{"post_id": "BOP07", "alerts_per_shift": 12, '
                                         '"calendar": {"haat_weekdays": ["tue"]}}', encoding="utf-8")
 
@@ -70,6 +79,7 @@ def main():
     app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")
     app.include_router(decision_api.router)
     app.get("/api/cameras")(lambda: [{"id": c, "name": n} for c, n in CAMERAS.items()])
+    app.get("/demo")(lambda: FileResponse(config.STATIC_DIR / "demo.html"))
     app.get("/api/threats/overview")(lambda: {"summary": {"active": 0, "in_progress": 0, "camera_issues": 0}})
     print(f"Synthetic preview data in {data_dir}. Open http://localhost:{args.port}/decision")
     uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")

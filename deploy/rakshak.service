@@ -1,0 +1,22 @@
+[Unit]
+Description=Rakshak AI edge box (detection, decision layer, signed ledger)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=rakshak
+Group=rakshak
+WorkingDirectory=/opt/rakshak
+Environment=DETECTOR_BACKEND=openvino
+ExecStart=/opt/rakshak/.venv/bin/uvicorn app.server:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5
+# Hardening: the service can write only its data and certificate folders.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/rakshak/data /opt/rakshak/certs
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,39 @@
+{
+  "cpu": "11th Gen Intel(R) Core(TM) i3-1115G4 @ 3.00GHz",
+  "logical_cpus": 4,
+  "os": "Windows-11-10.0.26200-SP0",
+  "backend": "openvino",
+  "general_model": "yolox_tiny.onnx",
+  "weapon_model": "threat_yolov8n.pt",
+  "motion_gating": true,
+  "idle_interval_s": 1.0,
+  "feeds": 13,
+  "feed_fps": 12.0,
+  "seconds": 60.1,
+  "fps_per_feed": {
+    "all": 0.63,
+    "active": 0.69,
+    "idle": 0.44,
+    "min": 0.42,
+    "max": 0.75
+  },
+  "active_feeds": 10,
+  "cycle_time_s": 1.54,
+  "process_cpu_percent_of_one_core": 215,
+  "per_feed": {
+    "gf-1": 0.7,
+    "gf-2": 0.7,
+    "ff-1": 0.7,
+    "ff-2": 0.72,
+    "pk-1": 0.72,
+    "pk-2": 0.7,
+    "en-1": 0.7,
+    "en-2": 0.75,
+    "sc-plaza": 0.43,
+    "sc-lobby": 0.48,
+    "sc-stairs": 0.42,
+    "sc-cafe": 0.6,
+    "sc-hall": 0.63
+  },
+  "measured_at": "2026-10-02T14:49:17"
+}

@@ -14,13 +14,16 @@ import logging
 import struct
 import threading
 import time
-from collections import deque
+from collections import Counter, deque
 
 import cv2
 import numpy as np
 
 from . import config
 from .detector import Detector, coverage, iou
+
+# Labels that keep a camera "active" (analysed every pass) under motion gating.
+ACTIVE_LABELS = {"person", "bicycle", "car", "motorcycle", "bus", "truck"}
 
 log = logging.getLogger(__name__)
 
@@ -278,13 +281,36 @@ class DetectionLoop(threading.Thread):
         self.detector = Detector()
         self.cycle_time = 0.0
         self.post_time = 0.0
+        # Motion gating: a quiet camera is analysed once every IDLE_INTERVAL_S, a camera with
+        # motion or with people / vehicles / a weapon in view on every pass.
+        self.last_run, self.thumbs, self.busy = {}, {}, {}
+        self.processed = Counter()  # frames analysed per camera (scripts/measure_perf.py)
+
+    @staticmethod
+    def _thumb(frame):
+        return cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (64, 36), interpolation=cv2.INTER_AREA).astype(np.int16)
+
+    def _due(self, cam, frame, now):
+        if not config.MOTION_GATING or cam.id not in self.last_run or self.busy.get(cam.id):
+            return True
+        if now - self.last_run[cam.id] >= config.IDLE_INTERVAL_S:
+            return True
+        return float(np.abs(self._thumb(frame) - self.thumbs[cam.id]).mean()) >= config.MOTION_THRESHOLD
+
+    def _ran(self, batch, results, now):
+        for (cam, _, frame), dets in zip(batch, results):
+            self.last_run[cam.id], self.thumbs[cam.id] = now, self._thumb(frame)
+            self.busy[cam.id] = any(d["label"] in ACTIVE_LABELS or d["threat"] for d in dets)
+            self.processed[cam.id] += 1
 
     def run(self):
         done = {}
         last_log = time.monotonic()
         while True:
+            now = time.monotonic()
             batch = [(cam, *cam.latest) for cam in self.cameras
-                     if cam.latest is not None and done.get(cam.id) != cam.latest[0]]
+                     if cam.latest is not None and done.get(cam.id) != cam.latest[0]
+                     and self._due(cam, cam.latest[1], now)]
             if not batch:
                 time.sleep(0.01)
                 continue
@@ -314,6 +340,7 @@ class DetectionLoop(threading.Thread):
         except Exception:
             log.exception("Detection failed")
             return False
+        self._ran(items, results, time.monotonic())
         t1 = time.monotonic()
         if self.on_results:
             try:
