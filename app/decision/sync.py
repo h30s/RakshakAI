@@ -15,6 +15,9 @@ log = logging.getLogger(__name__)
 
 
 def http_transport(base_url, timeout=10):
+    if not base_url.lower().startswith(("http://", "https://")):
+        raise ValueError(f"hq_url must be an http(s) URL, not {base_url!r}")
+
     def request(method, path, body=None):
         data = json.dumps(body).encode() if body is not None else None
         req = urllib.request.Request(base_url.rstrip("/") + path, data=data, method=method,

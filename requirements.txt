@@ -1,12 +1,12 @@
-# Install CPU PyTorch first for a much smaller download:
-#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-ultralytics>=8.3
+# Run time: what the edge box needs. No PyTorch, no Ultralytics.
 opencv-python-headless>=4.9
 fastapi>=0.110
 uvicorn[standard]>=0.29
-huggingface_hub>=0.23
 onnxruntime>=1.18
-onnx>=1.16         # only needed once, to export the ReID model in scripts/fetch_assets.py
-onnxslim>=0.1       # used by the ONNX export of the YOLO models
+numpy>=1.26
 segno>=1.6          # QR code for connecting a phone (Camera Sources)
-cryptography>=42    # self-signed HTTPS certificate for the phone camera page
+cryptography>=42    # Ed25519 ledger signatures; self-signed HTTPS certificate for the phone camera page
+# Optional, only where configured in data/post.json:
+#   pyserial    - GSM modem (SMS, voice call) and siren relay ("comms")
+#   paho-mqtt   - MQTT feed to a command-and-control system ("mqtt")
+#   openvino    - DETECTOR_BACKEND=openvino on Intel CPUs (N100); see scripts/quantize_openvino.py

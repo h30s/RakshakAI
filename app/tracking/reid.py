@@ -39,7 +39,7 @@ def export_onnx(weights, out_path):
     from .osnet import OSBlock, OSNet
 
     model = OSNet(num_classes=1, blocks=[OSBlock] * 3, layers=[2, 2, 2], channels=[16, 64, 96, 128])
-    state = torch.load(weights, map_location="cpu", weights_only=False)
+    state = torch.load(weights, map_location="cpu", weights_only=True)  # tensors only: no code runs on load
     state = {k.removeprefix("module."): v for k, v in state.get("state_dict", state).items()
              if "classifier" not in k}
     missing, _ = model.load_state_dict(state, strict=False)

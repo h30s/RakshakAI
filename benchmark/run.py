@@ -480,12 +480,33 @@ def report(res, synthetic_run):
     add(f"Verify time              {tm['verify_seconds']} s for {tm['entries']} entries with {tm['clips']} x {tm['clip_kb']} KB clips "
         f"(one-byte edit found: {tm['edit_found']}; this machine)")
     add(f"Signed SMS               {lt['sms_chars']} characters, verifies: {lt['sms_verifies']}")
+    names = {"server": "sealed", "console": "on console", "sms": "SMS accepted", "ack": "acknowledged"}
+    if res.get("latency"):
+        add("Latency from the triggering frame (live logs): " + "; ".join(
+            f"{names.get(k, k)} p50 {v['p50']} s / p95 {v['p95']} s (n={v['n']})" for k, v in res["latency"].items()))
+    else:
+        add("Latency                  no latency.csv in the data folder (copy DATA_DIR/latency.csv from a live run)")
     add("")
-    add("Not measured here: detection/face/ANPR accuracy, latency, power - they need the models and hardware.")
+    add("Not measured here: detection/face/ANPR accuracy and power; throughput: scripts/measure_perf.py.")
     add("Inputs: " + ", ".join(f"{k} sha256 {v[:12] if v else 'missing'}" for k, v in res["inputs"].items()))
     g = res["git"]
     add(f"Code: commit {(g['commit'] or 'unknown')[:10]}{' + uncommitted changes' if g['uncommitted_changes'] else ''}")
     return "\n".join(lines)
+
+
+def latency_stats(path):
+    """p50 / p95 per channel from a latency.csv written by the live system (DATA_DIR/latency.csv)."""
+    if not Path(path).exists():
+        return None
+    by_kind = defaultdict(list)
+    with open(path, newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            by_kind[r["kind"]].append(float(r["seconds"]))
+    out = {}
+    for kind, v in sorted(by_kind.items()):
+        v.sort()
+        out[kind] = {"n": len(v), "p50": round(v[len(v) // 2], 2), "p95": round(v[min(len(v) - 1, int(0.95 * len(v)))], 2)}
+    return out
 
 
 def load_params(path):
@@ -543,6 +564,7 @@ def main():
         "surge": surge_test(load_movements(mfile), calendar, per_shift, train_days, params),
         "review": rate(ratings, review_dir / "key.csv") if ratings.exists() and (review_dir / "key.csv").exists() else None,
         "ledger": ledger_test(),
+        "latency": latency_stats(folder / "latency.csv"),
     }
     res["seconds"] = round(time.time() - t0, 1)
     res["inputs"] = {"movements.csv": sha256(mfile), "staged.csv": sha256(sfile), "post.json": sha256(folder / "post.json"),

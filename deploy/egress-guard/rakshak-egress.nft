@@ -1,0 +1,42 @@
+#!/usr/sbin/nft -f
+# Rakshak AI Egress Guard: cameras sit on their own port (CAM_IF) and can never reach the
+# internet. The box pulls their video; the cameras get DHCP, DNS and time from the box only.
+# Every new connection a camera tries to make outwards is logged ("RK-EGRESS ") and dropped.
+# Every DNS name a camera looks up is logged by dnsmasq and answered with 0.0.0.0.
+#
+# install.sh replaces cam0 / 192.168.50.1 with the real interface and address.
+
+define CAM_IF = "cam0"
+define BOX_IP = 192.168.50.1
+
+table inet rakshak_egress
+delete table inet rakshak_egress
+
+table inet rakshak_egress {
+    counter cam_blocked { }
+
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        # Cameras with a hard-coded DNS server (8.8.8.8 ...) are answered by the box anyway,
+        # so every name they look up is logged.
+        iifname $CAM_IF udp dport 53 ip daddr != $BOX_IP dnat ip to $BOX_IP
+        iifname $CAM_IF tcp dport 53 ip daddr != $BOX_IP dnat ip to $BOX_IP
+    }
+
+    chain input {
+        type filter hook input priority filter; policy accept;
+        iifname $CAM_IF ct state established,related accept      # replies to the box's RTSP / ONVIF requests
+        iifname $CAM_IF udp dport { 53, 67, 123 } accept          # DNS, DHCP, NTP from the box
+        iifname $CAM_IF tcp dport 53 accept
+        iifname $CAM_IF ct state new log prefix "RK-EGRESS-BOX " level info drop   # anything else to the box
+        iifname $CAM_IF drop
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy accept;
+        # Nothing from the camera port is ever forwarded: no internet, no other network.
+        iifname $CAM_IF ct state new log prefix "RK-EGRESS " level info counter name cam_blocked drop
+        iifname $CAM_IF drop
+        oifname $CAM_IF ct state new drop   # nothing from outside reaches the cameras either
+    }
+}

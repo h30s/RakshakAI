@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo · Rakshak AI</title>
+  <meta name="description" content="Rakshak AI prototype: demo video and walkthrough of the running system.">
+  <meta name="theme-color" content="#07090e">
+  <style>
+    :root { color-scheme: dark; --bg: #07090e; --surface: #11151d; --border: #263042; --text: #e8ecf3; --muted: #93a0b4; --accent: #5b9dff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 system-ui, "Segoe UI", sans-serif; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+    a { color: var(--accent); }
+    h1 { font-size: clamp(24px, 4vw, 34px); margin: 0 0 6px; }
+    .lead { color: var(--muted); margin: 0 0 24px; }
+    video { width: 100%; border-radius: 14px; border: 1px solid var(--border); background: #000; }
+    .note { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; color: var(--muted); margin-bottom: 24px; }
+    .steps { display: grid; gap: 28px; }
+    figure { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    figure img { display: block; width: 100%; height: auto; }
+    figcaption { padding: 12px 16px; }
+    figcaption b { display: block; }
+    figcaption span { color: var(--muted); font-size: 14px; }
+    .links { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 28px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Rakshak AI · demo</h1>
+    <p class="lead">The prototype running on a laptop CPU, no GPU, on recorded footage.</p>
+
+    <video id="video" controls preload="metadata" hidden></video>
+    <p id="video-note" class="note">The 90-second demo video is being recorded. Until it is up, here is the
+      running prototype, screen by screen. Try it yourself at <a href="/">rakshakai.live</a>.</p>
+
+    <div class="steps">
+      <figure><img src="/static/site/shot-overview.jpg" alt="Overview screen with live threat status" loading="lazy" width="1680" height="1050">
+        <figcaption><b>1 · Overview</b><span>Threat status across all 13 cameras, camera health and the latest alerts.</span></figcaption></figure>
+      <figure><img src="/static/site/shot-cameras.jpg" alt="Camera grid with detections" loading="lazy" width="1680" height="1050">
+        <figcaption><b>2 · Cameras</b><span>Every feed with its detections: people in green, objects in amber, weapons in red.</span></figcaption></figure>
+      <figure><img src="/static/site/shot-threat.jpg" alt="Weapon alert with snapshot and actions" loading="lazy" width="1680" height="1050">
+        <figcaption><b>3 · A confirmed weapon</b><span>Confirmed over two passes, with a snapshot, a score and the actions taken.</span></figcaption></figure>
+      <figure><img src="/static/site/shot-journey.jpg" alt="Journey of one person across cameras" loading="lazy" width="1680" height="1050">
+        <figcaption><b>4 · Across cameras</b><span>One ID follows a person from camera to camera (re-identification).</span></figcaption></figure>
+      <figure><img src="/static/site/shot-modes.jpg" alt="Detection in night, thermal, fog and rain footage" loading="lazy" width="1680" height="1050">
+        <figcaption><b>5 · Night, thermal, fog, rain</b><span>The same pipeline on footage recorded in hard conditions.</span></figcaption></figure>
+      <figure><img src="/static/site/shot-sources.jpg" alt="Adding camera sources" loading="lazy" width="1680" height="1050">
+        <figcaption><b>6 · Existing cameras</b><span>Add an RTSP camera, a USB camera or a phone by QR code; no camera replacement.</span></figcaption></figure>
+      <figure><img src="/static/site/shot-reports.jpg" alt="Incident reports" loading="lazy" width="1680" height="1050">
+        <figcaption><b>7 · Reports</b><span>Every incident and action, exportable as CSV.</span></figcaption></figure>
+    </div>
+
+    <div class="links">
+      <a href="/decision">Ranked alerts (decision layer)</a>
+      <a href="https://github.com/h30s/RakshakAI">Source code</a>
+      <a href="https://github.com/h30s/RakshakAI/blob/main/CLAIMS.md">Every claim and its evidence</a>
+    </div>
+  </main>
+  <script>
+    // Show the video once static/site/demo.mp4 exists; until then the walkthrough stands alone.
+    fetch("/static/site/demo.mp4", { method: "HEAD" }).then((res) => {
+      if (!res.ok) return;
+      const v = document.getElementById("video");
+      v.src = "/static/site/demo.mp4";
+      v.hidden = false;
+      document.getElementById("video-note").hidden = true;
+    }).catch(() => {});
+  </script>
+</body>
+</html>

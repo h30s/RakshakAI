@@ -1,0 +1,9 @@
+# One-time model preparation (scripts/fetch_assets.py), not needed to run Rakshak AI.
+# Install CPU PyTorch first for a much smaller download:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+huggingface_hub>=0.23   # downloads the re-identification and weapon weights
+onnx>=1.16              # export of the re-identification model
+# Export of the weapon model (Ultralytics YOLOv8 weights) to ONNX. ultralytics is AGPL-3.0;
+# it is used here as a conversion tool only and is not shipped with the running system.
+ultralytics>=8.3
+onnxslim>=0.1

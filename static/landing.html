@@ -394,7 +394,7 @@
       <div class="proof reveal">
         <div><b>13</b><span>camera feeds analysed together in one shared pipeline</span></div>
         <div><b>2–3 s</b><span>for a full detection pass over all 13 feeds (measured on this laptop)</span></div>
-        <div><b>No GPU</b><span>everything runs on a 2016 dual-core laptop CPU (Intel i7-6600U)</span></div>
+        <div><b>No GPU</b><span>everything runs on a 2016 dual-core laptop CPU (Intel i7-6600U). Also measured on an Intel i3-1115G4: 2.4 s per pass with ONNX Runtime, 1.2–1.5 s with OpenVINO (<a href="https://github.com/h30s/RakshakAI/tree/main/benchmark/results">results</a>)</span></div>
         <div><b>5</b><span>visibility conditions tested: day, night, thermal, fog, rain and snow</span></div>
       </div>
 
@@ -407,7 +407,7 @@
       </div>
 
       <div class="caps">
-        <article class="card cap reveal"><h3><svg class="ic"><use href="#i-scan"/></svg>People, vehicles and objects</h3><p>A YOLOv8n model running on ONNX Runtime detects people, cars, buses, trucks, motorcycles, animals and dozens of other everyday objects (80 classes) on every feed, all on a CPU.</p></article>
+        <article class="card cap reveal"><h3><svg class="ic"><use href="#i-scan"/></svg>People, vehicles and objects</h3><p>A YOLOX model (Apache-2.0) running on ONNX Runtime or OpenVINO detects people, cars, buses, trucks, motorcycles, animals and dozens of other everyday objects (80 classes) on every feed, all on a CPU.</p></article>
         <article class="card cap reveal d1"><h3><svg class="ic"><use href="#i-alert"/></svg>Weapons, with false-alarm filtering</h3><p>A dedicated model detects guns, knives, grenades and explosions. A weapon counts only if it is seen on two passes and a hand-held one sits inside a detected person, which rules out one-frame errors.</p></article>
         <article class="card cap reveal d2"><h3><svg class="ic"><use href="#i-route"/></svg>Journeys across cameras</h3><p>Every person gets an ID. Across five synchronised cameras, appearance matching links a person only between cameras they could walk between, and a timing check rules out being in two places at once.</p></article>
         <article class="card cap reveal"><h3><svg class="ic"><use href="#i-bell"/></svg>Incidents, not alarm floods</h3><p>One incident per camera and threat type, with severity, a sound alert, "Working on it" and "Resolved" actions, notes and a complete history. Incidents survive restarts and export to CSV.</p></article>
@@ -561,8 +561,8 @@
         <h2>What exists, what is next, <span class="dim">and how it gets proven.</span></h2>
       </div>
       <div class="roadmap">
-        <article class="card phase now reveal"><span class="when">Now · Sep 2026</span><h3>Working prototype</h3><ul><li>Detection of people, vehicles and objects</li><li>Weapon alerts with false-alarm filtering</li><li>Tracking and cross-camera journeys</li><li>Incidents, actions, reports, export</li><li>Webcam and phone sources, condition tests</li></ul></article>
-        <article class="card phase next reveal d1"><span class="when">Next · Oct–Nov 2026</span><h3>Decision and evidence core</h3><ul><li>RTSP/ONVIF camera ingestion</li><li>Zones, dwell, direction, group movement</li><li>Per-post baseline, adaptive threshold, alert budget, shift digest</li><li>Sealed clips, hash-chained log, Section 63 draft</li><li>Watch Orders and the drafted shift report</li><li>Measurements on our own fixed-camera footage</li></ul></article>
+        <article class="card phase now reveal"><span class="when">Now · Oct 2026</span><h3>Working prototype</h3><ul><li>Detection (YOLOX), weapon alerts, cross-camera tracking</li><li>Per-post baseline, alert budget, surge mode, Watch Orders, shift digest</li><li>Signed hash-chained ledger, hourly anchors to Sector HQ, Section 63 Part A draft</li><li>Signed alert SMS with an offline check page, Border Pulse, shift report</li><li>Hindi and English operator screens</li></ul></article>
+        <article class="card phase next reveal d1"><span class="when">Next · Oct–Nov 2026</span><h3>Measured on our own footage</h3><ul><li>Benchmark on our own fixed-camera footage, with blind reviewers</li><li>Operator study and red-team test</li><li>GSM modem, siren and camera isolation tested on the edge box</li><li>Number-plate reading and face detection at gates</li><li>Tractor and e-rickshaw classes</li></ul></article>
         <article class="card phase reveal d2"><span class="when">Pilot · 0–6 months</span><h3>One frontier, real posts</h3><ul><li>2–3 Border Out Posts on existing cameras</li><li>30 days against the acceptance test, scored by the unit</li><li>Face detection and number-plate reading added</li><li>Hindi and regional-language interface</li></ul></article>
         <article class="card phase reveal d3"><span class="when">6–18 months</span><h3>Scale and integrate</h3><ul><li>Thermal and ground sensors under the same statistical framework</li><li>New posts starting from priors pooled across similar posts (statistics only, no video)</li><li>Integration with command-and-control systems</li><li>A hardened edge appliance</li></ul></article>
       </div>
@@ -588,6 +588,9 @@
           <li><div><b><a href="/app#people">People</a></b><span>Pick a person from the School Building and follow them across five cameras.</span></div></li>
           <li><div><b><a href="/modes">Detection Modes</a></b><span>Run the same pipeline on night, thermal, fog and rain footage.</span></div></li>
           <li><div><b><a href="/app#sources">Sources</a></b><span>Scan the QR code to stream your phone's camera into the same pipeline.</span></div></li>
+          <li><div><b><a href="/decision">Ranked Alerts</a></b><span>The decision layer: each alert with the reasons it fired, the shift budget, the digest and the signed ledger. Switch to Hindi.</span></div></li>
+          <li><div><b><a href="/pulse">Border Pulse</a></b><span>What changed at the post this week: new paths, shifted peak hours, repeat crossers.</span></div></li>
+          <li><div><b><a href="/demo">Demo</a></b><span>The walkthrough, and the demo video once it is up.</span></div></li>
         </ol>
       </div>
     </div>
@@ -674,7 +677,7 @@
         <li id="r4">Treaty of Peace and Friendship between India and Nepal, 1950.</li>
         <li id="r5">Up to 45% of activity missed after 12 minutes and 95% after 22 minutes: an industry figure widely attributed to Ainsworth (2002). It is often repeated and not rigorously established. On operator vigilance and workload, see Dadashi et al., "Semi-automated CCTV surveillance", <em>Applied Ergonomics</em> (2013). <a href="https://sciencedirect.com/science/article/abs/pii/S0003687012000695" rel="noopener" target="_blank">sciencedirect.com</a></li>
         <li id="r6">Bharatiya Sakshya Adhiniyam, 2023, Section 63: admissibility of electronic records; the Section 63(4) certificate includes the hash value of the record. <a href="https://indiankanoon.org/doc/125020475/" rel="noopener" target="_blank">indiankanoon.org</a>. Its validity was upheld by the Supreme Court in July 2026. <a href="https://www.scconline.com/blog/post/2026/07/08/sc-upholds-admissibility-of-electronic-evidence-under-section-63-4-bsa/" rel="noopener" target="_blank">scconline.com</a></li>
-        <li id="r7">Methods: CFAR detection (cell-averaging and order-statistic); inductive and Mondrian conformal prediction (Vovk et al.); CUSUM and Page–Hinkley change detection; isotonic calibration and expected calibration error; YOLOv8 (Ultralytics); OSNet person re-identification; MEVA multi-camera dataset (school-building feeds).</li>
+        <li id="r7">Methods: CFAR detection (cell-averaging and order-statistic); inductive and Mondrian conformal prediction (Vovk et al.); CUSUM and Page–Hinkley change detection; isotonic calibration and expected calibration error; YOLOX (Megvii); a fine-tuned YOLOv8 weapon model; OSNet person re-identification; MEVA multi-camera dataset (school-building feeds).</li>
       </ol>
       <p class="integrity"><strong style="color:var(--text-2)">How we use numbers.</strong> Every figure about Rakshak AI on this page is one of three things: measured on the prototype, labelled as a design target, or labelled as an estimate. External figures carry a source. The worked alert example is illustrative and says so.</p>
     </div>

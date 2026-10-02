@@ -1,0 +1,5 @@
+# Deploy files run on the Linux edge box: keep LF even in Windows checkouts.
+*.sh text eol=lf
+*.nft text eol=lf
+*.service text eol=lf
+deploy/**/*.conf text eol=lf

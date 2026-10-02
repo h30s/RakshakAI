@@ -38,6 +38,8 @@ Owner: _(team lead)_ · Compliance officer: _(Member F)_
 
 ## 2. Where we stand today (30 Sep 2026)
 
+> **Superseded for status: see [`CLAIMS.md`](../CLAIMS.md)**, which is kept up to date. The table below is the starting point on 30 Sep 2026.
+
 This is based on the public repo `github.com/h30s/RakshakAI` (last push 27 Sep). **If anyone has unpushed work, push it this week and update this table.**
 
 | Area | What exists | Gap vs PPT |

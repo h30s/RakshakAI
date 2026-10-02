@@ -18,6 +18,7 @@ import datetime as dt
 import hashlib
 import io
 import json
+import logging
 import os
 import threading
 import time
@@ -27,6 +28,8 @@ from pathlib import Path
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+
+log = logging.getLogger(__name__)
 
 GENESIS = "0" * 64
 SMS_LIMIT = 160
@@ -124,6 +127,7 @@ class Ledger:
         self.clip_dir = Path(clip_dir) if clip_dir else self.path.parent
         self.key = key
         self.entries = []
+        self.listeners = []  # called with each new entry (C2 feeds: MQTT, WebSocket)
         self.lock = threading.Lock()
         if self.path.exists():
             self.entries = [json.loads(line) for line in self.path.read_text(encoding="utf-8").splitlines() if line]
@@ -144,7 +148,12 @@ class Ledger:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-            return entry
+        for listener in self.listeners:
+            try:
+                listener(entry)
+            except Exception:  # a feed that is down must never stop sealing
+                log.debug("Ledger listener failed", exc_info=True)
+        return entry
 
     def anchor(self, start, end):
         """Append an 'anchor' entry with the Merkle root of every entry written since the previous

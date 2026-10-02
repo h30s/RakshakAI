@@ -33,10 +33,15 @@ cameras: list[Camera] = []
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    mode_clips = [clip for m in config.DETECTION_MODES for clip in m["clips"]]
-    missing = [f for _, _, f in config.CAMERAS + mode_clips if not (config.VIDEO_DIR / f).exists()]
+    missing = [f for _, _, f in config.CAMERAS if not (config.VIDEO_DIR / f).exists()]
     if missing:
         raise RuntimeError(f"Missing videos {missing} in {config.VIDEO_DIR} — run scripts/fetch_assets.py first")
+    # The /modes showcase clips are optional: a missing one is skipped, not fatal.
+    mode_clips = [clip for m in config.DETECTION_MODES for clip in m["clips"]]
+    skipped = [f for _, _, f in mode_clips if not (config.VIDEO_DIR / f).exists()]
+    if skipped:
+        log.warning("Detection-modes clips not found, skipped: %s (scripts/fetch_assets.py)", ", ".join(skipped))
+    mode_clips = [c for c in mode_clips if c[2] not in skipped]
     site_of = {cam: site for site, cams in config.TRACKING_SITES.items() for cam in cams}
     clocks = {site: time.monotonic() for site in config.TRACKING_SITES}
     files = {cam_id: config.VIDEO_DIR / file for cam_id, _, file in config.CAMERAS}
@@ -109,7 +114,8 @@ async def revalidate_static(request, call_next):
     """Make browsers re-check the page, scripts and styles on every load (cheap 304s), so an
     updated dashboard is picked up without a hard refresh."""
     response = await call_next(request)
-    if request.url.path in ("/", "/app", "/modes", "/reports", "/feedback", "/decision") or request.url.path.startswith("/static/"):
+    if request.url.path in ("/", "/app", "/modes", "/reports", "/feedback", "/decision", "/pulse", "/shift-report",
+                            "/verify", "/demo") or request.url.path.startswith("/static/"):
         response.headers["Cache-Control"] = "no-cache"
     return response
 app.include_router(tracking_api.router)

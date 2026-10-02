@@ -11,12 +11,15 @@ cut from each so the feeds can be played in lockstep.
 Detection-modes footage (the /modes page): Pexels clips recorded at night, in fog, rain and
 snow, plus two real thermal surveillance cameras of the MEVA dataset (CC BY 4.0).
 
-Weapon model: Subh775/Threat-Detection-YOLOv8n on Hugging Face (MIT).
+General detector: YOLOX (Megvii, Apache-2.0), official ONNX release (GENERAL_MODEL, default yolox_tiny.onnx).
+Weapon model: Subh775/Threat-Detection-YOLOv8n on Hugging Face (MIT card; trained with Ultralytics,
+see THIRD_PARTY.md), exported once to ONNX.
 Person re-identification model: OSNet-x0.25 trained on MSMT17, kaiyangzhou/osnet on Hugging Face
 (MIT; the MSMT17 training data is for non-commercial research use), converted to ONNX.
 
-Usage:  python scripts/fetch_assets.py [--force]
+Usage:  python scripts/fetch_assets.py [--force] [--models-only]
 """
+import hashlib
 import shutil
 import sys
 import tempfile
@@ -27,6 +30,7 @@ import cv2
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app import config  # noqa: E402
+from app.detector import onnx_path  # noqa: E402
 
 # output file -> Pexels video id (https://www.pexels.com/video/<id>/)
 FOOTAGE = {
@@ -77,6 +81,15 @@ MODE_FOOTAGE = {
     "mode_snow_street.mp4": (PEXELS_CDN + "30379876/13019692_960_540_60fps.mp4", 0, 30, None),
 }
 
+YOLOX_URL = "https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/"
+# Pinned: a changed file on the server is refused instead of silently run (supply-chain check).
+YOLOX_SHA256 = {
+    "yolox_nano.onnx": "c789161ed43c8269fcd4e67c67eeeb4e80c622da2eb296a20bc6007bd18a0b7d",
+    "yolox_tiny.onnx": "427cc366d34e27ff7a03e2899b5e3671425c262ea2291f88bb942bc1cc70b0f7",
+    "yolox_s.onnx": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+}
+REID_REVISION = "a5c5cc037c24235cda3b21085b93ad77c9616224"
+THREAT_REPO, THREAT_REVISION = "Subh775/Threat-Detection-YOLOv8n", "c6d6fa4e6c9bfd4c4fccb46478db23609e5468fb"
 REID_REPO = "kaiyangzhou/osnet"
 REID_FILE = ("osnet_x0_25_msmt17_combineall_256x128_amsgrad_ep150_stp60_lr0.0015_b64_fb10_softmax_"
              "labelsmooth_flip_jitter.pth")
@@ -124,10 +137,17 @@ def transcode(src, dest, start=0, seconds=MAX_SECONDS, crop=None):
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # the Windows console can't print ↓ ⚙ ✓ otherwise
     force = "--force" in sys.argv
     config.VIDEO_DIR.mkdir(exist_ok=True)
     config.MODEL_DIR.mkdir(exist_ok=True)
+    if "--models-only" not in sys.argv:
+        fetch_footage(force)
+    fetch_models(force)
+    print("Done.")
 
+
+def fetch_footage(force):
     with tempfile.TemporaryDirectory() as tmp:
         for name, pexels_id in FOOTAGE.items():
             dest = config.VIDEO_DIR / name
@@ -164,31 +184,37 @@ def main():
             raw.unlink()
             print(f"  {frames} frames @ {config.FEED_FPS:g} fps")
 
+
+def fetch_models(force):
     if not config.REID_MODEL.exists() or force:
         from huggingface_hub import hf_hub_download
         from app.tracking.reid import export_onnx
         print(f"↓ person re-identification model  ← {REID_REPO}")
-        export_onnx(hf_hub_download(REID_REPO, REID_FILE), config.REID_MODEL)
-    if not config.THREAT_MODEL.exists() or force:
-        from huggingface_hub import hf_hub_download
-        print("↓ weapon model  ← Subh775/Threat-Detection-YOLOv8n")
-        shutil.copy(hf_hub_download("Subh775/Threat-Detection-YOLOv8n", "weights/best.pt"), config.THREAT_MODEL)
+        export_onnx(hf_hub_download(REID_REPO, REID_FILE, revision=REID_REVISION), config.REID_MODEL)
     general = config.MODEL_DIR / config.GENERAL_MODEL
-    if not general.exists():
-        from ultralytics import YOLO
-        print(f"↓ {config.GENERAL_MODEL}")
-        YOLO(config.GENERAL_MODEL)  # ultralytics downloads it into the working directory
-        shutil.move(config.GENERAL_MODEL, general)
-    # ONNX exports of both detectors: identical results, ~1.5x faster on CPU (see app/detector.py)
-    from app.detector import onnx_path
-    for pt, imgsz in ((general, config.GENERAL_IMGSZ), (config.THREAT_MODEL, config.THREAT_IMGSZ)):
-        target = onnx_path(pt, imgsz)
-        if not target.exists() or force:
+    if not general.exists() or force:
+        print(f"↓ {config.GENERAL_MODEL}  ← Megvii YOLOX release (Apache-2.0)")
+        download(YOLOX_URL + config.GENERAL_MODEL, general)
+        expected = YOLOX_SHA256.get(config.GENERAL_MODEL)
+        if expected and hashlib.sha256(general.read_bytes()).hexdigest() != expected:
+            general.unlink()
+            raise SystemExit(f"{config.GENERAL_MODEL}: SHA-256 does not match the pinned release; not installed")
+    threat_onnx = onnx_path(config.THREAT_MODEL, config.THREAT_IMGSZ)
+    if not threat_onnx.exists() or force:
+        from huggingface_hub import hf_hub_download
+        print(f"↓ weapon model  ← {THREAT_REPO}")
+        shutil.copy(hf_hub_download(THREAT_REPO, "weights/best.pt", revision=THREAT_REVISION), config.THREAT_MODEL)
+        # One-time export to ONNX; the running system needs only ONNX Runtime. This step needs the
+        # ultralytics package (AGPL-3.0): pip install -r requirements-export.txt
+        try:
             from ultralytics import YOLO
-            print(f"⚙ {target.name}")
-            exported = YOLO(str(pt)).export(format="onnx", imgsz=imgsz, dynamic=True, batch=16, verbose=False)
-            shutil.move(exported, target)
-    print("Done.")
+        except ImportError:
+            print("  ! to export the weapon model: pip install -r requirements-export.txt, then run this again")
+        else:
+            print(f"⚙ {threat_onnx.name}")
+            exported = YOLO(str(config.THREAT_MODEL)).export(format="onnx", imgsz=config.THREAT_IMGSZ, dynamic=True,
+                                                             batch=16, verbose=False)
+            shutil.move(exported, threat_onnx)
 
 
 if __name__ == "__main__":
