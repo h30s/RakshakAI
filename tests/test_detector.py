@@ -1,5 +1,6 @@
 """Tests for the ONNX detector. The model checks run only when the models are downloaded
 (python scripts/fetch_assets.py --models-only); CI has no models and skips them."""
+import importlib.util
 import unittest
 
 import numpy as np
@@ -7,7 +8,9 @@ import numpy as np
 from app import config
 from app.detector import coverage, iou, nms, onnx_path
 
-HAVE_MODELS = (config.MODEL_DIR / config.GENERAL_MODEL).exists() and onnx_path(config.THREAT_MODEL, config.THREAT_IMGSZ).exists()
+HAVE_MODELS = (importlib.util.find_spec("onnxruntime") is not None
+               and (config.MODEL_DIR / config.GENERAL_MODEL).exists()
+               and onnx_path(config.THREAT_MODEL, config.THREAT_IMGSZ).exists())
 
 
 class GeometryTest(unittest.TestCase):
@@ -23,7 +26,7 @@ class GeometryTest(unittest.TestCase):
         self.assertEqual(coverage((2, 2, 4, 4), (0, 0, 10, 10)), 1.0)
 
 
-@unittest.skipUnless(HAVE_MODELS, "models not downloaded")
+@unittest.skipUnless(HAVE_MODELS, "models or onnxruntime not installed")
 class ModelTest(unittest.TestCase):
     def test_finds_people_on_a_demo_frame(self):
         import cv2
